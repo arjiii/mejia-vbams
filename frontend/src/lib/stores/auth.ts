@@ -3,7 +3,7 @@ import { writable, type Writable, get } from 'svelte/store';
 import api from '$lib/utils/api';
 
 // Use Vite env var for API base (falls back to localhost:8000/api).
-const API_BASE_URL = (import.meta.env?.VITE_API_BASE as string) || 'http://localhost:8000/api';
+const API_BASE_URL = (import.meta.env?.VITE_API_BASE as string) || '/api';
 
 // Export stores so components can subscribe or use the $ shorthand in .svelte files
 export const isAuthenticated: Writable<boolean> = writable(false);

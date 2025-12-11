@@ -23,7 +23,8 @@
 		goto('/login');
 	}
 
-	async function handleSubmit() {
+	async function handleSubmit(event: Event) {
+		event.preventDefault();
 		if (!make || !model || !licensePlate || !vin || !color) {
 			error = 'Please fill in all required fields';
 			return;
@@ -62,7 +63,7 @@
 	<title>Add Vehicle - VBAMS</title>
 </svelte:head>
 
-<div class="max-w-2xl mx-auto">
+<div class="mx-auto max-w-2xl">
 	<div class="space-y-6">
 		<!-- Header -->
 		<div>
@@ -71,16 +72,16 @@
 		</div>
 
 		<!-- Form -->
-		<form on:submit|preventDefault={handleSubmit} class="space-y-6">
+		<form onsubmit={handleSubmit} class="space-y-6">
 			{#if error}
-				<div class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md">
+				<div class="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-red-600">
 					{error}
 				</div>
 			{/if}
 
 			<!-- Basic Information -->
-			<div class="bg-white shadow rounded-lg p-6">
-				<h3 class="text-lg font-medium text-gray-900 mb-4">Basic Information</h3>
+			<div class="rounded-lg bg-white p-6 shadow">
+				<h3 class="mb-4 text-lg font-medium text-gray-900">Basic Information</h3>
 				<div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
 					<div>
 						<label for="make" class="block text-sm font-medium text-gray-700">Make *</label>
@@ -89,7 +90,7 @@
 							id="make"
 							bind:value={make}
 							required
-							class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+							class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
 							placeholder="e.g., Toyota"
 						/>
 					</div>
@@ -100,7 +101,7 @@
 							id="model"
 							bind:value={model}
 							required
-							class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+							class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
 							placeholder="e.g., Camry"
 						/>
 					</div>
@@ -113,7 +114,7 @@
 							min="1900"
 							max={new Date().getFullYear() + 1}
 							required
-							class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+							class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
 						/>
 					</div>
 					<div>
@@ -123,7 +124,7 @@
 							id="color"
 							bind:value={color}
 							required
-							class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+							class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
 							placeholder="e.g., Silver"
 						/>
 					</div>
@@ -131,16 +132,18 @@
 			</div>
 
 			<!-- Vehicle Details -->
-			<div class="bg-white shadow rounded-lg p-6">
-				<h3 class="text-lg font-medium text-gray-900 mb-4">Vehicle Details</h3>
+			<div class="rounded-lg bg-white p-6 shadow">
+				<h3 class="mb-4 text-lg font-medium text-gray-900">Vehicle Details</h3>
 				<div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
 					<div>
-						<label for="vehicleType" class="block text-sm font-medium text-gray-700">Vehicle Type *</label>
+						<label for="vehicleType" class="block text-sm font-medium text-gray-700"
+							>Vehicle Type *</label
+						>
 						<select
 							id="vehicleType"
 							bind:value={vehicleType}
 							required
-							class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+							class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
 						>
 							<option value="car">Car</option>
 							<option value="truck">Truck</option>
@@ -150,12 +153,13 @@
 						</select>
 					</div>
 					<div>
-						<label for="fuelType" class="block text-sm font-medium text-gray-700">Fuel Type *</label>
+						<label for="fuelType" class="block text-sm font-medium text-gray-700">Fuel Type *</label
+						>
 						<select
 							id="fuelType"
 							bind:value={fuelType}
 							required
-							class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+							class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
 						>
 							<option value="gasoline">Gasoline</option>
 							<option value="diesel">Diesel</option>
@@ -165,30 +169,33 @@
 						</select>
 					</div>
 					<div>
-						<label for="mileage" class="block text-sm font-medium text-gray-700">Mileage (km)</label>
+						<label for="mileage" class="block text-sm font-medium text-gray-700">Mileage (km)</label
+						>
 						<input
 							type="number"
 							id="mileage"
 							bind:value={mileage}
 							min="0"
-							class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+							class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
 						/>
 					</div>
 				</div>
 			</div>
 
 			<!-- Registration Information -->
-			<div class="bg-white shadow rounded-lg p-6">
-				<h3 class="text-lg font-medium text-gray-900 mb-4">Registration Information</h3>
+			<div class="rounded-lg bg-white p-6 shadow">
+				<h3 class="mb-4 text-lg font-medium text-gray-900">Registration Information</h3>
 				<div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
 					<div>
-						<label for="licensePlate" class="block text-sm font-medium text-gray-700">License Plate *</label>
+						<label for="licensePlate" class="block text-sm font-medium text-gray-700"
+							>License Plate *</label
+						>
 						<input
 							type="text"
 							id="licensePlate"
 							bind:value={licensePlate}
 							required
-							class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+							class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
 							placeholder="e.g., ABC-123"
 						/>
 					</div>
@@ -200,7 +207,7 @@
 							bind:value={vin}
 							required
 							maxlength="17"
-							class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm font-mono"
+							class="mt-1 block w-full rounded-md border-gray-300 font-mono shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
 							placeholder="17-character VIN"
 						/>
 					</div>
@@ -208,36 +215,42 @@
 			</div>
 
 			<!-- Insurance Information (Optional) -->
-			<div class="bg-white shadow rounded-lg p-6">
-				<h3 class="text-lg font-medium text-gray-900 mb-4">Insurance Information (Optional)</h3>
+			<div class="rounded-lg bg-white p-6 shadow">
+				<h3 class="mb-4 text-lg font-medium text-gray-900">Insurance Information (Optional)</h3>
 				<div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
 					<div>
-						<label for="insuranceProvider" class="block text-sm font-medium text-gray-700">Insurance Provider</label>
+						<label for="insuranceProvider" class="block text-sm font-medium text-gray-700"
+							>Insurance Provider</label
+						>
 						<input
 							type="text"
 							id="insuranceProvider"
 							bind:value={insuranceProvider}
-							class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+							class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
 							placeholder="e.g., State Farm"
 						/>
 					</div>
 					<div>
-						<label for="insurancePolicyNumber" class="block text-sm font-medium text-gray-700">Policy Number</label>
+						<label for="insurancePolicyNumber" class="block text-sm font-medium text-gray-700"
+							>Policy Number</label
+						>
 						<input
 							type="text"
 							id="insurancePolicyNumber"
 							bind:value={insurancePolicyNumber}
-							class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+							class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
 							placeholder="Policy number"
 						/>
 					</div>
 					<div class="sm:col-span-2">
-						<label for="insuranceExpiryDate" class="block text-sm font-medium text-gray-700">Expiry Date</label>
+						<label for="insuranceExpiryDate" class="block text-sm font-medium text-gray-700"
+							>Expiry Date</label
+						>
 						<input
 							type="date"
 							id="insuranceExpiryDate"
 							bind:value={insuranceExpiryDate}
-							class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+							class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
 						/>
 					</div>
 				</div>
@@ -245,13 +258,16 @@
 
 			<!-- Submit Button -->
 			<div class="flex justify-end space-x-3">
-				<a href="/vehicles" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+				<a
+					href="/vehicles"
+					class="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50"
+				>
 					Cancel
 				</a>
 				<button
 					type="submit"
 					disabled={loading}
-					class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+					class="inline-flex items-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
 				>
 					{#if loading}
 						<i class="fas fa-spinner fa-spin mr-2"></i>

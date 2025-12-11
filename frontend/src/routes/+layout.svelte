@@ -234,6 +234,7 @@
 							<div class="absolute right-0 top-0 -mr-12 pt-2">
 								<button
 									onclick={toggleMobileMenu}
+									aria-label="Close menu"
 									class="ml-1 flex h-10 w-10 items-center justify-center rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
 								>
 									<i class="fas fa-times text-white"></i>
@@ -298,6 +299,7 @@
 				<div class="relative z-10 flex h-16 flex-shrink-0 bg-white shadow">
 					<button
 						onclick={toggleMobileMenu}
+						aria-label="Open menu"
 						class="border-r border-gray-200 px-4 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 md:hidden"
 					>
 						<i class="fas fa-bars"></i>

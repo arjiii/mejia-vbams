@@ -1,21 +1,22 @@
 import axios from 'axios';
 import { browser } from '$app/environment';
 
-// Use current origin + /api for all requests
-// This assumes the frontend also hosts the API (via SvelteKit routes)
-export let API_BASE_URL = '/api';
+// Determine the API base URL based on environment
+// Production: Railway backend
+// Development: localhost
+const isDev = import.meta.env.DEV;
+const defaultBaseURL = isDev
+	? 'http://localhost:9000'
+	: 'https://mejia-vbams-production.up.railway.app';
+
+export let API_BASE_URL = import.meta.env?.VITE_API_BASE || defaultBaseURL;
 
 // Create axios instance with initial base
 const api = axios.create({ baseURL: API_BASE_URL, timeout: 10000 });
 
 if (browser) {
-	// If VITE_API_BASE is set, use it
-	const envBase = import.meta.env?.VITE_API_BASE as string;
-	if (envBase) {
-		API_BASE_URL = envBase;
-		api.defaults.baseURL = API_BASE_URL;
-	}
 	console.info('[VBAMS] API base URL set to', API_BASE_URL);
+	console.info('[VBAMS] Environment:', isDev ? 'development' : 'production');
 }
 
 // Add request interceptor to include auth token

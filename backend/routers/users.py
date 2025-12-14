@@ -98,6 +98,61 @@ async def activate_user(
     
     return MessageResponse(message="User activated successfully")
 
+@router.put("/{user_id}/suspend", response_model=MessageResponse)
+async def suspend_user(
+    user_id: int,
+    current_user: User = Depends(require_admin),
+    db: Session = Depends(get_db)
+):
+    """Suspend a user account (admin only)."""
+    user = db.query(User).filter(User.id == user_id).first()
+    
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+    
+    # Prevent self-suspension
+    if user.id == current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot suspend your own account"
+        )
+    
+    user.is_active = False
+    user.is_verified = False  # Also unverify suspended users
+    db.commit()
+    
+    return MessageResponse(message="User suspended successfully")
+
+@router.delete("/{user_id}", response_model=MessageResponse)
+async def delete_user(
+    user_id: int,
+    current_user: User = Depends(require_admin),
+    db: Session = Depends(get_db)
+):
+    """Delete a user account permanently (admin only)."""
+    user = db.query(User).filter(User.id == user_id).first()
+    
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+    
+    # Prevent self-deletion
+    if user.id == current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot delete your own account"
+        )
+    
+    db.delete(user)
+    db.commit()
+    
+    return MessageResponse(message="User deleted successfully")
+
 @router.get("/stats/overview")
 async def get_user_stats(
     current_user: User = Depends(require_admin),

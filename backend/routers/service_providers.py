@@ -220,3 +220,51 @@ async def approve_service_provider(
         
     db.commit()
     return MessageResponse(message="Service Provider approved successfully")
+
+@router.put("/{user_id}/suspend", response_model=MessageResponse)
+async def suspend_service_provider(
+    user_id: int,
+    current_user: User = Depends(require_admin),
+    db: Session = Depends(get_db)
+):
+    """Suspend a service provider."""
+    user = db.query(User).filter(User.id == user_id, User.role == "service_provider").first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Service provider user not found")
+    
+    profile = db.query(ServiceProvider).filter(ServiceProvider.user_id == user.id).first()
+    
+    # Suspend user account
+    user.is_active = False
+    user.is_verified = False
+    
+    # Suspend provider profile
+    if profile:
+        profile.is_active = False
+        profile.is_verified = False
+        profile.is_online = False
+        
+    db.commit()
+    return MessageResponse(message="Service Provider suspended successfully")
+
+@router.delete("/{user_id}", response_model=MessageResponse)
+async def delete_service_provider(
+    user_id: int,
+    current_user: User = Depends(require_admin),
+    db: Session = Depends(get_db)
+):
+    """Delete a service provider and their profile."""
+    user = db.query(User).filter(User.id == user_id, User.role == "service_provider").first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Service provider user not found")
+    
+    # Delete provider profile first (foreign key)
+    profile = db.query(ServiceProvider).filter(ServiceProvider.user_id == user.id).first()
+    if profile:
+        db.delete(profile)
+    
+    # Delete user
+    db.delete(user)
+    db.commit()
+    
+    return MessageResponse(message="Service Provider deleted successfully")

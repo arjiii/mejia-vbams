@@ -11,6 +11,7 @@
 	let vehicles: any[] = $state([]);
 	let nearbyProviders: any[] = $state([]);
 	let selectedVehicle = $state('');
+	let selectedProvider = $state(''); // NEW: Selected service provider
 	let issueType = $state('');
 	let location = $state('');
 	let description = $state('');
@@ -120,7 +121,8 @@
 		isLoadingProviders = true;
 		try {
 			const res = await api.get(`/service-providers/nearby/${lat}/${long}`);
-			nearbyProviders = res.data;
+			// Sort by distance (nearest first)
+			nearbyProviders = res.data.sort((a: any, b: any) => a.distance - b.distance);
 		} catch (e) {
 			console.error('Failed to load providers', e);
 		} finally {
@@ -193,21 +195,28 @@
 			const breakdownRes = await api.post('/breakdowns/', breakdownData);
 			const breakdownId = breakdownRes.data.id;
 
-			// 2. Create Assistance Request
+			// 2. Create Assistance Request with selected provider
 			let serviceType = 'repair';
 			if (issueType === 'tire') serviceType = 'tire_change';
 			if (issueType === 'fuel') serviceType = 'fuel_delivery';
 			if (issueType === 'electrical') serviceType = 'jump_start';
 			if (issueType === 'accident') serviceType = 'towing';
 
-			await api.post('/assistance/', {
+			const assistanceData: any = {
 				breakdown_id: breakdownId,
 				service_type: serviceType,
 				latitude: lat,
 				longitude: long,
 				address: location,
 				priority: 'high'
-			});
+			};
+
+			// Add selected provider if one was chosen
+			if (selectedProvider) {
+				assistanceData.service_provider_id = parseInt(selectedProvider);
+			}
+
+			await api.post('/assistance/', assistanceData);
 
 			alert('Assistance request submitted successfully!');
 			goto('/dashboard');
@@ -353,6 +362,80 @@
 								<Map center={mapCenter} markers={mapMarkers} onLocationSelect={handleMapSelect} />
 							</div>
 						</div>
+
+						<!-- Provider Selection (NEW) -->
+						{#if nearbyProviders.length > 0}
+							<div>
+								<label class="mb-2 block text-sm font-semibold text-gray-700"
+									>Select Service Provider</label
+								>
+								<p class="mb-3 text-xs text-gray-500">
+									Choose from nearby providers (sorted by distance)
+								</p>
+								<div class="max-h-64 space-y-2 overflow-y-auto">
+									{#each nearbyProviders as provider}
+										<label
+											class={`cursor-pointer rounded-lg border p-4 transition-all hover:bg-gray-50 ${selectedProvider === String(provider.id) ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-500' : 'border-gray-200'}`}
+										>
+											<input
+												type="radio"
+												name="provider"
+												value={provider.id}
+												bind:group={selectedProvider}
+												class="sr-only"
+											/>
+											<div class="flex items-start justify-between">
+												<div class="flex-1">
+													<div class="font-semibold text-gray-900">
+														{provider.business_name ||
+															`${provider.first_name} ${provider.last_name}`}
+													</div>
+													<div class="mt-1 flex items-center gap-4 text-xs text-gray-600">
+														<span class="flex items-center">
+															<i class="fas fa-location-arrow mr-1 text-blue-600"></i>
+															<strong>{provider.distance.toFixed(2)} km</strong> away
+														</span>
+														{#if provider.phone}
+															<span class="flex items-center">
+																<i class="fas fa-phone mr-1"></i>
+																{provider.phone}
+															</span>
+														{/if}
+													</div>
+													{#if provider.services}
+														<div class="mt-2 flex flex-wrap gap-1">
+															{#each provider.services.slice(0, 3) as service}
+																<span
+																	class="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-700"
+																>
+																	{service}
+																</span>
+															{/each}
+														</div>
+													{/if}
+												</div>
+												<div class="ml-3">
+													{#if selectedProvider === String(provider.id)}
+														<div
+															class="flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-white"
+														>
+															<i class="fas fa-check text-xs"></i>
+														</div>
+													{:else}
+														<div class="h-6 w-6 rounded-full border-2 border-gray-300"></div>
+													{/if}
+												</div>
+											</div>
+										</label>
+									{/each}
+								</div>
+								<p class="mt-2 text-xs text-gray-500">
+									<i class="fas fa-info-circle mr-1"></i>
+									Provider selection is optional. If not selected, the nearest available provider will
+									be assigned.
+								</p>
+							</div>
+						{/if}
 
 						<!-- Description -->
 						<div>

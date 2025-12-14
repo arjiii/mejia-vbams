@@ -97,10 +97,12 @@ async def get_nearby_service_providers(
     service_type: str = None,
     db: Session = Depends(get_db)
 ):
-    """Get service providers near a specific location."""
+    """Get verified service providers near a specific location, sorted by distance."""
+    # ONLY get verified, active, and online providers
     providers = db.query(ServiceProvider).join(User).filter(
         ServiceProvider.is_active == True,
-        ServiceProvider.is_online == True
+        ServiceProvider.is_online == True,
+        ServiceProvider.is_verified == True  # ONLY VERIFIED PROVIDERS
     ).all()
     
     # Filter by distance and service type
@@ -120,6 +122,9 @@ async def get_nearby_service_providers(
                 entry.phone = provider.user.phone
                 entry.distance = round(dist_km, 1)
                 nearby_providers.append(entry)
+    
+    # Sort by distance (nearest first)
+    nearby_providers.sort(key=lambda p: p.distance)
     
     return nearby_providers
 

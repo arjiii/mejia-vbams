@@ -6,8 +6,8 @@ import { browser } from '$app/environment';
 // Development: localhost
 const isDev = import.meta.env.DEV;
 const defaultBaseURL = isDev
-	? 'http://localhost:9000'
-	: 'https://mejia-vbams-production.up.railway.app';
+	? 'http://localhost:9000/api'
+	: 'https://mejia-vbams-production.up.railway.app/api';
 
 export let API_BASE_URL = import.meta.env?.VITE_API_BASE || defaultBaseURL;
 

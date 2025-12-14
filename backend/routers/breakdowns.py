@@ -210,3 +210,32 @@ async def get_nearby_breakdowns(
             nearby_breakdowns.append(breakdown)
     
     return [BreakdownResponse.from_orm(breakdown) for breakdown in nearby_breakdowns]
+
+@router.delete("/{breakdown_id}", response_model=MessageResponse)
+async def delete_breakdown(
+    breakdown_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Delete a breakdown report."""
+    breakdown = db.query(Breakdown).filter(
+        Breakdown.id == breakdown_id
+    ).first()
+    
+    if not breakdown:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Breakdown not found"
+        )
+    
+    # Check if user has permission to delete
+    if current_user.role == "driver" and breakdown.driver_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to delete this breakdown"
+        )
+    
+    db.delete(breakdown)
+    db.commit()
+    
+    return MessageResponse(message="Breakdown deleted successfully")

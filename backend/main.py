@@ -38,19 +38,26 @@ app = FastAPI(
 )
 
 # CORS middleware
-# Allow common frontend dev origins (Vite default ports) and any FRONTEND_URL from env
-default_origins = [
-    "http://localhost:3000",
-    "http://localhost:5173",
-    "http://localhost:5174",
-]
-env_origin = os.getenv("FRONTEND_URL")
-if env_origin:
-    default_origins.insert(0, env_origin)
+# Read allowed origins from environment variable
+allowed_origins_env = os.getenv("ALLOWED_ORIGINS", "")
+allowed_origins = []
+
+if allowed_origins_env:
+    # Split comma-separated origins and strip whitespace
+    allowed_origins = [origin.strip() for origin in allowed_origins_env.split(",")]
+else:
+    # Default origins for development
+    allowed_origins = [
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "http://localhost:5174",
+    ]
+
+print(f"[CORS] Allowed origins: {allowed_origins}")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=default_origins,
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

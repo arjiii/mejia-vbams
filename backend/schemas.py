@@ -327,8 +327,15 @@ class TokenData(BaseModel):
     user_id: Optional[int] = None
 
 class LoginRequest(BaseModel):
-    email: EmailStr
+    email: str
     password: str
+
+class OTPRequest(BaseModel):
+    identifier: str  # Email or Phone
+
+class OTPVerify(BaseModel):
+    identifier: str
+    otp: str
 
 # Response Schemas
 class MessageResponse(BaseModel):

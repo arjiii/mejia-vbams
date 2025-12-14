@@ -66,15 +66,13 @@ export async function login(email: string, password: string) {
 	}
 }
 
-
-
 // Register function
 export async function register(userData: any) {
 	try {
 		const response = await api.post('/auth/register', userData);
 
-		// Some backends return the token on register, others return only the user object.
-		const accessToken = response.data?.access_token || response.data?.accessToken || response.data?.token;
+		// Backend now returns a token immediately (user is active)
+		const accessToken = response.data?.access_token;
 
 		if (accessToken) {
 			if (browser) {
@@ -87,24 +85,10 @@ export async function register(userData: any) {
 			return { success: true };
 		}
 
-		// If no token returned, attempt to auto-login with the credentials provided
-		// (this keeps UX smooth for APIs that don't return a token at register)
-		if (userData.email && userData.password) {
-			const loginResult = await login(userData.email, userData.password);
-			if (loginResult.success) {
-				return { success: true };
-			}
-			// Auto-login failed — fallthrough to return success but ask user to login
-			return {
-				success: false,
-				error: 'Registered successfully but automatic login failed. Please sign in.'
-			};
-		}
-
-		// If we reach here, registration succeeded but we couldn't determine token or auto-login
+		// Return success but user needs to login
 		return { success: true };
+
 	} catch (error: any) {
-		// Try to extract useful error messages from common shapes
 		const serverMsg =
 			error?.response?.data?.detail ||
 			error?.response?.data?.message ||

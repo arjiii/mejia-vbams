@@ -1,10 +1,9 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { register } from '$lib/stores/auth';
 	import { page } from '$app/stores';
+	import { register } from '$lib/stores/auth';
 
 	let firstName = $state('');
-
 	let lastName = $state('');
 	let businessName = $state('');
 	let email = $state('');
@@ -35,32 +34,28 @@
 		loading = true;
 		error = '';
 
-		const userData: any = {
-			first_name: firstName,
-			last_name: lastName,
-			email,
-			phone,
-			password,
-			role
-		};
+		try {
+			const userData = {
+				first_name: firstName,
+				last_name: lastName,
+				email,
+				phone,
+				password,
+				role,
+				...(role === 'service_provider' && businessName ? { business_name: businessName } : {})
+			};
 
-		if (role === 'service_provider') {
-			userData.business_name = businessName;
-		}
+			const result = await register(userData);
 
-		const result = await register(userData);
-
-		if (result.success) {
-			goto('/dashboard');
-		} else {
-			if (
-				typeof result.error === 'string' &&
-				(result.error.includes('Not Found') || result.error.includes('404'))
-			) {
-				error = `Backend endpoint not found. Make sure the backend is running and reachable.`;
+			if (result.success) {
+				// Registration successful, redirect to login
+				goto('/login?registered=true');
 			} else {
-				error = typeof result.error === 'string' ? result.error : 'Registration failed';
+				error = result.error || 'Registration failed';
 			}
+		} catch (e: any) {
+			console.error(e);
+			error = e.message || 'Registration failed';
 		}
 
 		loading = false;

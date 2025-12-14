@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { get } from 'svelte/store';
 	import { goto } from '$app/navigation';
-	import { login, user } from '$lib/stores/auth';
+	import { page } from '$app/stores';
+	import { login } from '$lib/stores/auth';
 
 	let email = $state('');
 	let password = $state('');
@@ -9,24 +9,28 @@
 	let error = $state('');
 	let showPassword = $state(false);
 
+	// Check if user just registered
+	let successMessage = $state('');
+	if ($page.url.searchParams.get('registered') === 'true') {
+		successMessage = 'Registration successful! Please log in with your credentials.';
+	}
+
 	async function handleSubmit(event: Event) {
 		event.preventDefault();
 		loading = true;
 		error = '';
+		successMessage = '';
 
-		const result = await login(email, password);
-
-		if (result.success) {
-			const currentUser = get(user);
-			if (currentUser?.role === 'admin') {
-				goto('/dashboard');
-			} else if (currentUser?.role === 'service_provider') {
+		try {
+			const result = await login(email, password);
+			if (result.success) {
 				goto('/dashboard');
 			} else {
-				goto('/dashboard');
+				error = result.error || 'Invalid email or password';
 			}
-		} else {
-			error = result.error || 'Invalid email or password';
+		} catch (err: any) {
+			console.error(err);
+			error = err.message || 'Authentication failed';
 		}
 
 		loading = false;
@@ -75,19 +79,7 @@
 							<i class="fas fa-check-circle mr-3 text-blue-300"></i>
 							<span class="text-blue-50">Verified Service Providers</span>
 						</li>
-						<li class="flex items-center">
-							<i class="fas fa-check-circle mr-3 text-blue-300"></i>
-							<span class="text-blue-50">Transparent Pricing</span>
-						</li>
 					</ul>
-
-					<!-- Notice -->
-					<div class="mt-8 rounded-xl bg-white/10 p-4 backdrop-blur-sm">
-						<p class="flex items-center text-sm text-blue-100">
-							<i class="fas fa-shield-alt mr-2"></i>
-							Join thousands of drivers and providers on the most reliable network.
-						</p>
-					</div>
 				</div>
 			</div>
 
@@ -102,8 +94,17 @@
 				<!-- Header -->
 				<div class="mb-8">
 					<h2 class="mb-2 text-3xl font-bold text-gray-900">Welcome Back</h2>
-					<p class="text-gray-500">Sign in to access your dashboard</p>
+					<p class="text-gray-500">Sign in with your credentials</p>
 				</div>
+
+				{#if successMessage}
+					<div
+						class="mb-6 rounded-xl border-2 border-green-200 bg-green-50 px-4 py-3 text-green-700"
+					>
+						<i class="fas fa-check-circle mr-2"></i>
+						{successMessage}
+					</div>
+				{/if}
 
 				{#if error}
 					<div class="mb-6 rounded-xl border-2 border-red-200 bg-red-50 px-4 py-3 text-red-700">
@@ -114,7 +115,7 @@
 
 				<!-- Login Form -->
 				<form onsubmit={handleSubmit} class="space-y-5">
-					<!-- Email -->
+					<!-- Email Input -->
 					<div>
 						<label for="email" class="mb-2 block text-sm font-medium text-gray-700"
 							>Email Address</label
@@ -126,10 +127,11 @@
 							placeholder="you@example.com"
 							class="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
 							required
+							disabled={loading}
 						/>
 					</div>
 
-					<!-- Password -->
+					<!-- Password Input -->
 					<div>
 						<label for="password" class="mb-2 block text-sm font-medium text-gray-700"
 							>Password</label
@@ -157,17 +159,8 @@
 						</div>
 					</div>
 
-					<!-- Forgot Password & Links -->
-					<div class="flex items-center justify-between">
-						<label
-							class="flex cursor-pointer items-center text-sm text-gray-600 hover:text-gray-900"
-						>
-							<input
-								type="checkbox"
-								class="mr-2 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-							/>
-							Remember me
-						</label>
+					<!-- Forgotten Password -->
+					<div class="flex items-center justify-end">
 						<a href="/forgot-password" class="text-sm text-blue-600 hover:text-blue-700">
 							Forgot Password?
 						</a>
@@ -181,7 +174,7 @@
 					>
 						{#if loading}
 							<i class="fas fa-spinner fa-spin mr-2"></i>
-							Signing In...
+							Signing in...
 						{:else}
 							<i class="fas fa-sign-in-alt mr-2"></i>
 							Sign In

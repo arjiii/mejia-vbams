@@ -109,13 +109,13 @@
 					<!-- Email -->
 					<div>
 						<label for="email" class="mb-2 block text-sm font-medium text-gray-700"
-							>Email Address</label
+							>Email or Phone Number</label
 						>
 						<input
 							id="email"
-							type="email"
+							type="text"
 							bind:value={email}
-							placeholder="your@email.com"
+							placeholder="your@email.com or mobile number"
 							class="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
 							required
 						/>

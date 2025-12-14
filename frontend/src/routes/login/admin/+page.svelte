@@ -118,13 +118,13 @@
 					<!-- Email -->
 					<div>
 						<label for="email" class="mb-2 block text-sm font-medium text-gray-700"
-							>Admin Email</label
+							>Admin Email or Phone</label
 						>
 						<input
 							id="email"
-							type="email"
+							type="text"
 							bind:value={email}
-							placeholder="admin@vbams.com"
+							placeholder="admin@vbams.com or phone"
 							class="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-red-500"
 							required
 						/>

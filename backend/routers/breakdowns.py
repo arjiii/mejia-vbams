@@ -45,11 +45,11 @@ async def report_breakdown(
         if hasattr(data.get('severity'), 'value'):
             data['severity'] = data['severity'].value
             
-        db_breakdown = Breakdown(
-            vehicle_id=breakdown_data.vehicle_id,
-            driver_id=current_user.id,
-            **data
-        )
+        # Add driver_id to data (not in BreakdownCreate schema)
+        data['driver_id'] = current_user.id
+        
+        # Create breakdown with all data
+        db_breakdown = Breakdown(**data)
         
         db.add(db_breakdown)
         db.commit()

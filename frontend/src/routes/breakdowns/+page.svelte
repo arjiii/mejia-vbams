@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import api from '$lib/utils/api';
 
 	interface Breakdown {
 		id: number;
@@ -12,42 +13,37 @@
 		cost: number;
 	}
 
-	let breakdowns: Breakdown[] = $state([]);
+	import { driverStore } from '$lib/stores/dashboard';
+
+	// Derived Stores
+	let storeBreakdowns = $derived($driverStore.data?.breakdowns || []);
+	let storeVehicles = $derived($driverStore.data?.vehicles || []);
+	let loading = $derived($driverStore.loading);
 	let filterStatus = $state('all');
 
+	// Join logic - derived automatically when store updates
+	let breakdowns = $derived(
+		storeBreakdowns.map((b: any) => {
+			const vehicle = storeVehicles.find((v: any) => v.id === b.vehicle_id);
+			const vehicleName = vehicle
+				? `${vehicle.year} ${vehicle.make} ${vehicle.model} (${vehicle.license_plate})`
+				: 'Unknown Vehicle';
+
+			return {
+				id: b.id,
+				vehicle: vehicleName,
+				issue: b.category,
+				location: b.address || 'Unknown Location',
+				date: b.created_at,
+				status: b.status || 'reported',
+				provider: 'Pending Assignment', // Breakdown model doesn't link provider directly unless joined
+				cost: 0 // Breakdown doesn't have cost, AssistanceRequest does.
+			};
+		})
+	);
+
 	onMount(() => {
-		breakdowns = [
-			{
-				id: 1,
-				vehicle: '2020 Toyota Camry (ABC-1234)',
-				issue: 'Flat Tire',
-				location: 'EDSA, Makati',
-				date: '2024-12-01 14:30',
-				status: 'completed',
-				provider: 'Quick Fix Auto',
-				cost: 500
-			},
-			{
-				id: 2,
-				vehicle: '2019 Honda Civic (XYZ-5678)',
-				issue: 'Dead Battery',
-				location: 'BGC, Taguig',
-				date: '2024-11-28 09:15',
-				status: 'completed',
-				provider: 'Mobile Mechanic',
-				cost: 400
-			},
-			{
-				id: 3,
-				vehicle: '2020 Toyota Camry (ABC-1234)',
-				issue: 'Engine Overheating',
-				location: 'Ortigas, Pasig',
-				date: '2024-11-20 16:45',
-				status: 'completed',
-				provider: 'Road Rescue',
-				cost: 1200
-			}
-		];
+		driverStore.load();
 	});
 
 	function getStatusColor(status: string) {
@@ -78,7 +74,7 @@
 		</div>
 		<a
 			href="/assistance"
-			class="rounded-lg bg-gradient-to-r from-red-600 to-orange-600 px-4 py-2 text-sm font-bold text-white shadow-lg transition-all hover:from-red-700 hover:to-orange-700"
+			class="rounded-lg bg-gradient-to-r from-blue-600 to-cyan-600 px-4 py-2 text-sm font-bold text-white shadow-lg transition-all hover:from-blue-700 hover:to-cyan-700"
 		>
 			<i class="fas fa-exclamation-triangle mr-2"></i>
 			Request Assistance

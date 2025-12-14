@@ -1,6 +1,35 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
+	import { adminStore } from '$lib/stores/dashboard';
+
 	let reportType = $state('monthly');
 	let reportPeriod = $state('last30days');
+	let loading = $derived($adminStore.loading);
+
+	let stats = $derived.by(() => {
+		if (!$adminStore.data) {
+			return {
+				totalUsers: 0,
+				serviceProviders: 0,
+				completedJobs: 0,
+				activeBreakdowns: 0
+			};
+		}
+
+		const requests = $adminStore.data.requests || [];
+		const completed = requests.filter((r: any) => r.status === 'completed').length;
+
+		return {
+			totalUsers: $adminStore.data.stats.totalUsers,
+			serviceProviders: $adminStore.data.stats.totalProviders,
+			completedJobs: completed,
+			activeBreakdowns: $adminStore.data.stats.activeBreakdowns
+		};
+	});
+
+	onMount(() => {
+		adminStore.load();
+	});
 </script>
 
 <svelte:head>
@@ -9,8 +38,12 @@
 
 <div class="space-y-6">
 	<div>
-		<h1 class="text-3xl font-bold text-gray-900">System Reports</h1>
-		<p class="mt-2 text-sm text-gray-600">View analytics and generate custom reports</p>
+		<div class="flex items-center justify-between">
+			<div>
+				<h1 class="text-3xl font-bold text-gray-900">System Reports</h1>
+				<p class="mt-2 text-sm text-gray-600">View analytics and generate custom reports</p>
+			</div>
+		</div>
 	</div>
 
 	<!-- Stats Overview -->
@@ -18,7 +51,7 @@
 		<div class="rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 p-6 text-white shadow-lg">
 			<i class="fas fa-users text-3xl opacity-75"></i>
 			<div class="mt-4">
-				<div class="text-3xl font-bold">150</div>
+				<div class="text-3xl font-bold">{stats.totalUsers}</div>
 				<div class="text-sm opacity-90">Total Users</div>
 			</div>
 		</div>
@@ -27,21 +60,21 @@
 		>
 			<i class="fas fa-tools text-3xl opacity-75"></i>
 			<div class="mt-4">
-				<div class="text-3xl font-bold">25</div>
+				<div class="text-3xl font-bold">{stats.serviceProviders}</div>
 				<div class="text-sm opacity-90">Service Providers</div>
 			</div>
 		</div>
 		<div class="rounded-xl bg-gradient-to-br from-green-500 to-green-600 p-6 text-white shadow-lg">
 			<i class="fas fa-check-circle text-3xl opacity-75"></i>
 			<div class="mt-4">
-				<div class="text-3xl font-bold">1,234</div>
+				<div class="text-3xl font-bold">{stats.completedJobs}</div>
 				<div class="text-sm opacity-90">Completed Jobs</div>
 			</div>
 		</div>
 		<div class="rounded-xl bg-gradient-to-br from-red-500 to-red-600 p-6 text-white shadow-lg">
 			<i class="fas fa-car-crash text-3xl opacity-75"></i>
 			<div class="mt-4">
-				<div class="text-3xl font-bold">45</div>
+				<div class="text-3xl font-bold">{stats.activeBreakdowns}</div>
 				<div class="text-sm opacity-90">Active Breakdowns</div>
 			</div>
 		</div>
@@ -75,7 +108,7 @@
 					<option value="lastyear">Last Year</option>
 				</select>
 			</div>
-			<div classclass="flex items-end">
+			<div class="flex items-end">
 				<button
 					class="w-full rounded-lg bg-gradient-to-r from-red-600 to-orange-600 px-4 py-2 text-sm font-bold text-white shadow-lg hover:from-red-700 hover:to-orange-700"
 				>

@@ -66,6 +66,18 @@ async def get_assistance_requests(
     
     return [AssistanceRequestResponse.from_orm(request) for request in requests]
 
+@router.get("/available", response_model=List[AssistanceRequestResponse])
+async def get_available_requests(
+    current_user: User = Depends(require_service_provider),
+    db: Session = Depends(get_db)
+):
+    """Get all pending assistance requests available for pickup."""
+    requests = db.query(AssistanceRequest).filter(
+        AssistanceRequest.status == "pending"
+    ).order_by(AssistanceRequest.created_at.desc()).all()
+    
+    return [AssistanceRequestResponse.from_orm(request) for request in requests]
+
 @router.get("/{request_id}", response_model=AssistanceRequestResponse)
 async def get_assistance_request(
     request_id: int,

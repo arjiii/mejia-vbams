@@ -10,41 +10,31 @@
 		requestedAt: string;
 	}
 
-	let requests: ServiceRequest[] = $state([
-		{
-			id: 1,
-			customer: 'Maria Garcia',
-			type: 'Flat Tire',
-			location: 'BGC, Taguig',
-			distance: '3.2 km',
-			urgency: 'high',
-			estimatedPay: 450,
-			requestedAt: '5 mins ago'
-		},
-		{
-			id: 2,
-			customer: 'Carlos Reyes',
-			type: 'Battery Jump',
-			location: 'Ortigas Center',
-			distance: '5.8 km',
-			urgency: 'medium',
-			estimatedPay: 350,
-			requestedAt: '12 mins ago'
-		},
-		{
-			id: 3,
-			customer: 'Lisa Tan',
-			type: 'Towing Service',
-			location: 'EDSA Ayala',
-			distance: '8.1 km',
-			urgency: 'high',
-			estimatedPay: 1500,
-			requestedAt: '20 mins ago'
-		}
-	]);
+	import { onMount } from 'svelte';
+	import { providerStore } from '$lib/stores/dashboard';
+	import api from '$lib/utils/api';
 
-	function acceptRequest(id: number) {
-		console.log('Accepting request:', id);
+	let requests = $derived($providerStore.data?.activeRequests || []);
+	let loading = $derived($providerStore.loading);
+
+	onMount(() => {
+		providerStore.load();
+	});
+
+	function refreshData() {
+		providerStore.load(true);
+	}
+
+	async function acceptRequest(id: number) {
+		if (!confirm('Accept this job?')) return;
+		try {
+			await api.put(`/assistance/${id}/accept`);
+			alert('Job accepted!');
+			providerStore.load(true);
+		} catch (e) {
+			console.error('Failed to accept request:', e);
+			alert('Failed to accept job. It may have been taken.');
+		}
 	}
 </script>
 
@@ -54,8 +44,18 @@
 
 <div class="space-y-6">
 	<div>
-		<h1 class="text-3xl font-bold text-gray-900">Nearby Service Requests</h1>
-		<p class="mt-2 text-sm text-gray-600">Accept requests from drivers in your area</p>
+		<div class="flex items-center justify-between">
+			<div>
+				<h1 class="text-3xl font-bold text-gray-900">Nearby Service Requests</h1>
+				<p class="mt-2 text-sm text-gray-600">Accept requests from drivers in your area</p>
+			</div>
+			<button
+				onclick={refreshData}
+				class="rounded-lg bg-gray-100 px-3 py-2 text-xs font-bold text-gray-600 hover:bg-gray-200"
+			>
+				<i class="fas fa-sync-alt mr-2"></i>Refresh
+			</button>
+		</div>
 	</div>
 
 	<div class="space-y-4">

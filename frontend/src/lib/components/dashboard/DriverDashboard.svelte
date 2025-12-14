@@ -1,11 +1,12 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { user } from '$lib/stores/auth';
-	import { mockVehicles, mockBreakdowns, mockAssistance } from '$lib/mock/mockData';
+	import api from '$lib/utils/api';
+	import StatsCard from '$lib/components/common/StatsCard.svelte';
 
 	interface Breakdown {
 		id: number;
-		vehicle: { make: string; model: string; license_plate: string };
+		vehicle_id: number;
 		category: string;
 		description: string;
 		status: string;
@@ -13,19 +14,16 @@
 		address: string;
 	}
 
-	let vehicleCount = $state(0);
-	let breakdownCount = $state(0);
-	let assistanceCount = $state(0);
-	let recentBreakdowns: Breakdown[] = $state([]);
-	let loading = $state(true);
+	import { driverStore } from '$lib/stores/dashboard';
+
+	let vehicleCount = $derived($driverStore.data?.vehicleCount || 0);
+	let breakdownCount = $derived($driverStore.data?.breakdownCount || 0);
+	let assistanceCount = $derived($driverStore.data?.assistanceCount || 0);
+	let recentBreakdowns = $derived($driverStore.data?.recentBreakdowns || []);
+	let loading = $derived($driverStore.loading);
 
 	onMount(() => {
-		// Use mock data locally so the UI functions without backend
-		vehicleCount = mockVehicles.length;
-		breakdownCount = mockBreakdowns.length;
-		assistanceCount = mockAssistance.length;
-		recentBreakdowns = mockBreakdowns.slice(0, 5);
-		loading = false;
+		driverStore.load();
 	});
 
 	function getStatusColor(status: string) {
@@ -53,7 +51,7 @@
 					<h1 class="text-3xl font-bold">
 						Welcome back{#if $user}, {$user.first_name}{/if}!
 					</h1>
-					<p class="mt-2 text-blue-100">Manage your vehicles and get assistance when you need it</p>
+					<p class="mt-1 text-blue-100">Here's your vehicle and breakdown status</p>
 				</div>
 				<div class="hidden md:block">
 					<i class="fas fa-car text-6xl opacity-30"></i>
@@ -63,80 +61,26 @@
 
 		<!-- Stats Grid -->
 		<div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-			<div
-				class="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-lg transition-shadow duration-300 hover:shadow-xl"
-			>
-				<div class="p-5">
-					<div class="flex items-center">
-						<div class="flex-shrink-0 rounded-lg bg-blue-50 p-3">
-							<i class="fas fa-car text-2xl text-blue-600"></i>
-						</div>
-						<div class="ml-5 w-0 flex-1">
-							<dl>
-								<dt class="truncate text-sm font-medium text-gray-500">Total Vehicles</dt>
-								<dd class="text-2xl font-bold text-gray-900">{vehicleCount}</dd>
-							</dl>
-						</div>
-					</div>
-				</div>
-			</div>
-
-			<div
-				class="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-lg transition-shadow duration-300 hover:shadow-xl"
-			>
-				<div class="p-5">
-					<div class="flex items-center">
-						<div class="flex-shrink-0 rounded-lg bg-yellow-50 p-3">
-							<i class="fas fa-exclamation-triangle text-2xl text-yellow-600"></i>
-						</div>
-						<div class="ml-5 w-0 flex-1">
-							<dl>
-								<dt class="truncate text-sm font-medium text-gray-500">Breakdowns</dt>
-								<dd class="text-2xl font-bold text-gray-900">{breakdownCount}</dd>
-							</dl>
-						</div>
-					</div>
-				</div>
-			</div>
-
-			<div
-				class="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-lg transition-shadow duration-300 hover:shadow-xl"
-			>
-				<div class="p-5">
-					<div class="flex items-center">
-						<div class="flex-shrink-0 rounded-lg bg-green-50 p-3">
-							<i class="fas fa-handshake text-2xl text-green-600"></i>
-						</div>
-						<div class="ml-5 w-0 flex-1">
-							<dl>
-								<dt class="truncate text-sm font-medium text-gray-500">Assistance Requests</dt>
-								<dd class="text-2xl font-bold text-gray-900">{assistanceCount}</dd>
-							</dl>
-						</div>
-					</div>
-				</div>
-			</div>
-
-			<div
-				class="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-lg transition-shadow duration-300 hover:shadow-xl"
-			>
-				<div class="p-5">
-					<div class="flex items-center">
-						<div class="flex-shrink-0 rounded-lg bg-purple-50 p-3">
-							<i class="fas fa-map-marker-alt text-2xl text-purple-600"></i>
-						</div>
-						<div class="ml-5 w-0 flex-1">
-							<dl>
-								<dt class="truncate text-sm font-medium text-gray-500">Location Status</dt>
-								<dd class="flex items-center text-lg font-bold text-green-600">
-									<span class="mr-2 h-2.5 w-2.5 rounded-full bg-green-500"></span>
-									Online
-								</dd>
-							</dl>
-						</div>
-					</div>
-				</div>
-			</div>
+			<StatsCard title="Total Vehicles" value={vehicleCount} icon="fa-car" color="blue" />
+			<StatsCard
+				title="Breakdowns"
+				value={breakdownCount}
+				icon="fa-exclamation-triangle"
+				color="yellow"
+			/>
+			<StatsCard
+				title="Assistance Requests"
+				value={assistanceCount}
+				icon="fa-handshake"
+				color="green"
+			/>
+			<StatsCard
+				title="Location Status"
+				value="Online"
+				icon="fa-map-marker-alt"
+				color="purple"
+				description="GPS is active"
+			/>
 		</div>
 
 		<!-- Main Content Grid -->
@@ -160,11 +104,11 @@
 								</div>
 								<p class="mb-4 text-gray-500">No recent breakdowns reported</p>
 								<a
-									href="/breakdowns/new"
+									href="/assistance"
 									class="inline-flex items-center rounded-lg border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-700 transition-colors hover:bg-blue-200"
 								>
 									<i class="fas fa-plus mr-2"></i>
-									Report a Breakdown
+									Request Assistance
 								</a>
 							</div>
 						{:else}
@@ -228,12 +172,12 @@
 					</div>
 					<div class="space-y-4 p-6">
 						<a
-							href="/breakdowns/new"
+							href="/assistance"
 							class="flex w-full transform items-center justify-between rounded-lg border border-transparent bg-gradient-to-r from-blue-600 to-blue-700 px-4 py-3 text-sm font-medium text-white shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:from-blue-700 hover:to-blue-800"
 						>
 							<span class="flex items-center">
 								<i class="fas fa-plus-circle mr-3 text-lg"></i>
-								Report Breakdown
+								Request Assistance
 							</span>
 							<i class="fas fa-chevron-right opacity-50"></i>
 						</a>

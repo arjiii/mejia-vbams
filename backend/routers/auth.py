@@ -7,21 +7,13 @@ from models import User
 from schemas import UserCreate, UserResponse, LoginRequest, Token, UserLocationUpdate, MessageResponse
 from auth import get_password_hash, verify_password, create_access_token
 
-# Get config
-try:
-    from config import ACCESS_TOKEN_EXPIRE_MINUTES
-    ACCESS_TOKEN_EXPIRE_MINUTES = float(ACCESS_TOKEN_EXPIRE_MINUTES)
-except:
-    ACCESS_TOKEN_EXPIRE_MINUTES = 30.0  # Default value
+import os
 
-# Dummy get_current_user for demonstration (replace with real logic)
-from fastapi.security import OAuth2PasswordBearer
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
-def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
-    user = db.query(User).first()  # Replace with real token decode logic
-    if not user:
-        raise HTTPException(status_code=401, detail="Invalid authentication")
-    return user
+# Get config from env
+ACCESS_TOKEN_EXPIRE_MINUTES = float(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
+
+# Import the proper get_current_user from auth module
+from auth import get_current_user
 
 router = APIRouter()
 

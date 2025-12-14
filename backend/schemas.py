@@ -63,6 +63,7 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     password: str
+    business_name: Optional[str] = None
     
     @validator('password')
     def validate_password(cls, v):
@@ -205,6 +206,19 @@ class ServiceProviderBase(BaseModel):
     base_rate: float
     per_km_rate: float = 0.0
     hourly_rate: float = 0.0
+    documents: Optional[List[str]] = []
+
+    @validator('services', 'documents', pre=True)
+    def parse_json_fields(cls, v):
+        if v is None:
+            return []
+        if isinstance(v, str):
+            import json
+            try:
+                return json.loads(v)
+            except:
+                return []
+        return v
 
 class ServiceProviderCreate(ServiceProviderBase):
     pass
@@ -212,6 +226,7 @@ class ServiceProviderCreate(ServiceProviderBase):
 class ServiceProviderUpdate(BaseModel):
     business_name: Optional[str] = None
     services: Optional[List[ServiceType]] = None
+    documents: Optional[List[str]] = None
     service_radius: Optional[int] = None
     latitude: Optional[float] = None
     longitude: Optional[float] = None
@@ -236,6 +251,15 @@ class ServiceProviderResponse(ServiceProviderBase):
     
     class Config:
         from_attributes = True
+
+class ServiceProviderPublicResponse(ServiceProviderResponse):
+    first_name: str
+    last_name: str
+    phone: str
+    distance: float = 0.0
+
+class ServiceProviderAdminDetail(ServiceProviderResponse):
+    user: UserResponse
 
 class ServiceProviderLocationUpdate(BaseModel):
     latitude: float
@@ -270,6 +294,8 @@ class AssistanceRequestUpdate(BaseModel):
     payment_method: Optional[str] = None
     rating: Optional[int] = None
     feedback: Optional[str] = None
+
+
 
 class AssistanceRequestResponse(AssistanceRequestBase):
     id: int
@@ -310,3 +336,19 @@ class MessageResponse(BaseModel):
 
 class ErrorResponse(BaseModel):
     detail: str
+
+# Earnings Schemas
+class Transaction(BaseModel):
+    id: int
+    job: str
+    customer: str
+    amount: float
+    date: str
+    status: str
+
+class EarningsResponse(BaseModel):
+    today: float
+    this_week: float
+    this_month: float
+    total: float
+    transactions: List[Transaction]

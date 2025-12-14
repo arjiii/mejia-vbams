@@ -6,6 +6,7 @@
 	let password = $state('admin123');
 	let isLoading = $state(false);
 	let error = $state('');
+	let showPassword = $state(false);
 
 	async function handleLogin() {
 		error = '';
@@ -134,14 +135,27 @@
 						<label for="password" class="mb-2 block text-sm font-medium text-gray-700"
 							>Password</label
 						>
-						<input
-							id="password"
-							type="password"
-							bind:value={password}
-							placeholder="••••••••"
-							class="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-red-500"
-							required
-						/>
+						<div class="relative">
+							<input
+								id="password"
+								type={showPassword ? 'text' : 'password'}
+								bind:value={password}
+								placeholder="••••••••"
+								class="w-full rounded-xl border border-gray-300 px-4 py-3 pr-10 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-red-500"
+								required
+							/>
+							<button
+								type="button"
+								class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+								onclick={() => (showPassword = !showPassword)}
+							>
+								{#if showPassword}
+									<i class="fas fa-eye-slash"></i>
+								{:else}
+									<i class="fas fa-eye"></i>
+								{/if}
+							</button>
+						</div>
 					</div>
 
 					<!-- Forgot Password -->

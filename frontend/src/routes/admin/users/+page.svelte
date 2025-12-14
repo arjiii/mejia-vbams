@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { user } from '$lib/stores/auth';
+	import api from '$lib/utils/api';
 
 	interface User {
 		id: number;
@@ -12,52 +13,26 @@
 		phone: string;
 	}
 
-	let users: User[] = $state([]);
+	import { adminStore } from '$lib/stores/dashboard';
+
+	let users = $derived($adminStore.data?.hiddenUsers || []);
 	let filteredUsers: User[] = $state([]);
 	let searchQuery = $state('');
 	let filterRole = $state('all');
+	let loading = $derived($adminStore.loading);
 
 	onMount(() => {
-		// Mock data
-		users = [
-			{
-				id: 1,
-				name: 'John Doe',
-				email: 'john@example.com',
-				role: 'driver',
-				status: 'active',
-				created_at: '2024-01-15',
-				phone: '+1234567890'
-			},
-			{
-				id: 2,
-				name: 'Jane Smith',
-				email: 'jane@example.com',
-				role: 'driver',
-				status: 'active',
-				created_at: '2024-02-20',
-				phone: '+1234567891'
-			},
-			{
-				id: 3,
-				name: 'Bob Wilson',
-				email: 'bob@example.com',
-				role: 'driver',
-				status: 'inactive',
-				created_at: '2024-03-10',
-				phone: '+1234567892'
-			},
-			{
-				id: 4,
-				name: 'Alice Brown',
-				email: 'alice@example.com',
-				role: 'driver',
-				status: 'active',
-				created_at: '2024-01-25',
-				phone: '+1234567893'
-			}
-		];
-		filteredUsers = users;
+		adminStore.load();
+	});
+
+	function refreshData() {
+		adminStore.load(true);
+	}
+
+	$effect(() => {
+		if (users.length > 0) {
+			searchUsers();
+		}
 	});
 
 	function searchUsers() {
@@ -93,6 +68,13 @@
 		>
 			<i class="fas fa-user-plus mr-2"></i>
 			Add User
+		</button>
+		<button
+			onclick={refreshData}
+			class="ml-2 h-10 w-10 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200"
+			title="Refresh Data"
+		>
+			<i class="fas fa-sync-alt"></i>
 		</button>
 	</div>
 

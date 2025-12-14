@@ -1,528 +1,548 @@
 <script lang="ts">
-	import { fade, fly, scale } from 'svelte/transition';
-	import { quintOut } from 'svelte/easing';
+	import { onMount } from 'svelte';
+	import { fade, fly, slide } from 'svelte/transition';
+
+	let mobileMenuOpen = false;
+	let innerWidth: number;
+	let scrollY: number;
+
+	function toggleMobileMenu() {
+		mobileMenuOpen = !mobileMenuOpen;
+	}
+
+	function closeMobileMenu() {
+		mobileMenuOpen = false;
+	}
 </script>
 
+<svelte:window bind:innerWidth bind:scrollY />
+
 <svelte:head>
-	<title>VBAMS - Vehicle Breakdown Assistance Management System</title>
+	<title>VBAMS - Professional Roadside Assistance</title>
 	<meta
 		name="description"
-		content="Professional roadside assistance platform connecting drivers with verified service providers."
+		content="Fast, reliable vehicle breakdown assistance connecting drivers with verified service providers."
 	/>
+	<!-- Font Awesome -->
 	<link
 		rel="stylesheet"
 		href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
 	/>
+	<!-- Google Fonts -->
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+	<link
+		href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+		rel="stylesheet"
+	/>
 </svelte:head>
 
-<!-- Navigation -->
-<nav class="sticky top-0 z-50 border-b border-gray-200 bg-white bg-white/90 backdrop-blur-sm">
-	<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-		<div class="flex h-16 items-center justify-between">
-			<!-- Logo -->
-			<div class="animate-slideIn flex items-center">
-				<div
-					class="mr-3 flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-purple-600 shadow-lg"
-				>
-					<i class="fas fa-car text-lg text-white"></i>
-				</div>
-				<span
-					class="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-xl font-bold text-transparent"
-					>VBAMS</span
-				>
-			</div>
-
-			<!-- Nav Links -->
-			<div class="hidden items-center space-x-8 md:flex">
-				<a href="#features" class="font-medium text-gray-600 transition-colors hover:text-blue-600"
-					>Features</a
-				>
-				<a
-					href="#how-it-works"
-					class="font-medium text-gray-600 transition-colors hover:text-purple-600">How It Works</a
-				>
-				<a href="#about" class="font-medium text-gray-600 transition-colors hover:text-blue-600"
-					>About</a
-				>
-				<a
-					href="/login"
-					class="transform rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-2 font-medium text-white transition-all hover:-translate-y-0.5 hover:shadow-lg"
-				>
-					Login
-				</a>
-			</div>
-		</div>
-	</div>
-</nav>
-
-<!-- Hero Section -->
-<section
-	class="relative overflow-hidden bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 py-20"
+<div
+	class="min-h-screen bg-gray-50 font-sans text-gray-900 selection:bg-blue-100 selection:text-blue-900"
 >
-	<!-- Animated Background Blobs -->
-	<div class="absolute inset-0 overflow-hidden">
-		<div class="blob blob-1"></div>
-		<div class="blob blob-2"></div>
-		<div class="blob blob-3"></div>
-	</div>
-
-	<div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-		<div class="mx-auto mb-16 max-w-3xl text-center">
-			<h1 class="animate-fadeInUp mb-6 text-5xl font-bold leading-tight text-gray-900 md:text-6xl">
-				Roadside Assistance,<br />
-				<span
-					class="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent"
-				>
-					Made Simple
-				</span>
-			</h1>
-			<p class="animate-fadeInUp animation-delay-200 mb-10 text-xl text-gray-600">
-				Connect with verified service providers instantly. Get help when you need it most.
-			</p>
-		</div>
-
-		<!-- Login Cards -->
-		<div class="mx-auto grid max-w-5xl grid-cols-1 gap-6 md:grid-cols-3">
-			<!-- Driver Card -->
-			<a
-				href="/login/driver"
-				class="animate-fadeInUp group block transform rounded-2xl border-2 border-blue-200 bg-white p-8 transition-all hover:-translate-y-2 hover:border-blue-600 hover:shadow-2xl"
-			>
-				<div class="flex flex-col items-center text-center">
+	<!-- Navbar -->
+	<nav
+		class={`fixed left-0 right-0 top-0 z-50 transition-all duration-300 ${
+			scrollY > 20 ? 'bg-white/90 shadow-sm backdrop-blur-md' : 'bg-transparent'
+		}`}
+	>
+		<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+			<div class="flex h-20 items-center justify-between">
+				<!-- Logo -->
+				<div class="flex items-center gap-3">
 					<div
-						class="mb-4 flex h-16 w-16 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 shadow-lg transition-transform group-hover:scale-110"
+						class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 text-white shadow-lg"
 					>
-						<i class="fas fa-car text-2xl text-white"></i>
+						<i class="fas fa-car-crash text-lg"></i>
 					</div>
-					<h3 class="mb-2 text-xl font-bold text-gray-900">I'm a Driver</h3>
-					<p class="mb-6 text-sm text-gray-600">Get roadside assistance instantly</p>
-					<div
-						class="w-full rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 py-3 font-semibold text-white transition-all group-hover:shadow-lg"
+					<span
+						class="bg-gradient-to-r from-blue-700 to-purple-700 bg-clip-text text-xl font-extrabold tracking-tight text-transparent"
 					>
-						Login
-					</div>
+						VBAMS
+					</span>
 				</div>
-			</a>
 
-			<!-- Service Provider Card -->
-			<a
-				href="/login/provider"
-				class="animate-fadeInUp animation-delay-100 group block transform rounded-2xl border-2 border-purple-200 bg-white p-8 transition-all hover:-translate-y-2 hover:border-purple-600 hover:shadow-2xl"
-			>
-				<div class="flex flex-col items-center text-center">
-					<div
-						class="mb-4 flex h-16 w-16 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 shadow-lg transition-transform group-hover:scale-110"
+				<!-- Desktop Menu -->
+				<div class="hidden items-center space-x-8 md:flex">
+					<a
+						href="#how-it-works"
+						class="text-sm font-medium text-gray-600 transition-colors hover:text-blue-600"
+						>How it Works</a
 					>
-						<i class="fas fa-tools text-2xl text-white"></i>
-					</div>
-					<h3 class="mb-2 text-xl font-bold text-gray-900">I'm a Provider</h3>
-					<p class="mb-6 text-sm text-gray-600">Grow your service business</p>
-					<div
-						class="w-full rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 py-3 font-semibold text-white transition-all group-hover:shadow-lg"
+					<a
+						href="#features"
+						class="text-sm font-medium text-gray-600 transition-colors hover:text-blue-600"
+						>Features</a
 					>
-						Login
+					<a
+						href="#roles"
+						class="text-sm font-medium text-gray-600 transition-colors hover:text-blue-600"
+						>For Providers</a
+					>
+					<div class="flex items-center gap-3 border-l border-gray-200 pl-4">
+						<a href="/login" class="text-sm font-semibold text-gray-700 hover:text-blue-600"
+							>Log in</a
+						>
+						<a
+							href="/register"
+							class="rounded-full bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:bg-blue-700 hover:shadow-lg focus:ring-4 focus:ring-blue-100"
+						>
+							Get Started
+						</a>
 					</div>
 				</div>
-			</a>
 
-			<!-- Admin Card -->
-			<a
-				href="/login/admin"
-				class="animate-fadeInUp animation-delay-200 group block transform rounded-2xl border-2 border-red-200 bg-white p-8 transition-all hover:-translate-y-2 hover:border-red-600 hover:shadow-2xl"
-			>
-				<div class="flex flex-col items-center text-center">
-					<div
-						class="mb-4 flex h-16 w-16 items-center justify-center rounded-xl bg-gradient-to-br from-red-500 to-orange-500 shadow-lg transition-transform group-hover:scale-110"
+				<!-- Mobile Hamburger -->
+				<div class="flex md:hidden">
+					<button
+						onclick={toggleMobileMenu}
+						class="rounded-md p-2 text-gray-600 hover:bg-gray-100 focus:outline-none"
+						aria-label="Toggle menu"
 					>
-						<i class="fas fa-shield-alt text-2xl text-white"></i>
-					</div>
-					<h3 class="mb-2 text-xl font-bold text-gray-900">Administrator</h3>
-					<p class="mb-6 text-sm text-gray-600">Manage the platform</p>
-					<div
-						class="w-full rounded-xl bg-gradient-to-r from-red-600 to-orange-600 py-3 font-semibold text-white transition-all group-hover:shadow-lg"
-					>
-						Login
-					</div>
+						<i class={`fas ${mobileMenuOpen ? 'fa-times' : 'fa-bars'} text-xl`}></i>
+					</button>
 				</div>
-			</a>
-		</div>
-	</div>
-</section>
-
-<!-- Features Section -->
-<section id="features" class="bg-white py-20">
-	<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-		<div class="mb-16 text-center">
-			<h2 class="mb-4 text-3xl font-bold text-gray-900 md:text-4xl">Why Choose VBAMS</h2>
-			<p class="text-lg text-gray-600">Professional roadside assistance platform</p>
-		</div>
-
-		<div class="grid grid-cols-1 gap-12 md:grid-cols-3">
-			<div class="hover-lift group text-center">
-				<div
-					class="mx-auto mb-4 flex h-20 w-20 transform items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 shadow-lg transition-transform group-hover:rotate-6"
-				>
-					<i class="fas fa-bolt text-3xl text-white"></i>
-				</div>
-				<h3 class="mb-2 text-xl font-bold text-gray-900">Fast Response</h3>
-				<p class="text-gray-600">Get connected with service providers in under 60 seconds</p>
-			</div>
-
-			<div class="hover-lift animation-delay-100 group text-center">
-				<div
-					class="mx-auto mb-4 flex h-20 w-20 transform items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 shadow-lg transition-transform group-hover:rotate-6"
-				>
-					<i class="fas fa-shield-check text-3xl text-white"></i>
-				</div>
-				<h3 class="mb-2 text-xl font-bold text-gray-900">Verified Providers</h3>
-				<p class="text-gray-600">All service providers are thoroughly vetted and verified</p>
-			</div>
-
-			<div class="hover-lift animation-delay-200 group text-center">
-				<div
-					class="mx-auto mb-4 flex h-20 w-20 transform items-center justify-center rounded-2xl bg-gradient-to-br from-green-500 to-emerald-500 shadow-lg transition-transform group-hover:rotate-6"
-				>
-					<i class="fas fa-map-marked-alt text-3xl text-white"></i>
-				</div>
-				<h3 class="mb-2 text-xl font-bold text-gray-900">Real-Time Tracking</h3>
-				<p class="text-gray-600">Track your service provider's location in real-time</p>
 			</div>
 		</div>
-	</div>
-</section>
 
-<!-- How It Works Section -->
-<section id="how-it-works" class="bg-gradient-to-br from-gray-50 to-blue-50 py-20">
-	<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-		<div class="mb-16 text-center">
-			<h2 class="mb-4 text-3xl font-bold text-gray-900 md:text-4xl">How It Works</h2>
-			<p class="text-lg text-gray-600">Get assistance in three simple steps</p>
-		</div>
-
-		<div class="relative grid grid-cols-1 gap-8 md:grid-cols-3">
-			<!-- Connection Lines (Desktop) -->
+		<!-- Mobile Menu Dropdown -->
+		{#if mobileMenuOpen}
 			<div
-				class="absolute left-1/4 right-1/4 top-8 hidden h-1 bg-gradient-to-r from-blue-300 via-purple-300 to-pink-300 md:block"
-			></div>
-
-			<div class="hover-lift group relative text-center">
-				<div
-					class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-cyan-600 text-2xl font-bold text-white shadow-lg transition-transform group-hover:scale-110"
-				>
-					1
-				</div>
-				<h3 class="mb-2 text-xl font-bold text-gray-900">Request Assistance</h3>
-				<p class="text-gray-600">Submit your breakdown details and location</p>
-			</div>
-
-			<div class="hover-lift animation-delay-100 group relative text-center">
-				<div
-					class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-purple-600 to-pink-600 text-2xl font-bold text-white shadow-lg transition-transform group-hover:scale-110"
-				>
-					2
-				</div>
-				<h3 class="mb-2 text-xl font-bold text-gray-900">Get Matched</h3>
-				<p class="text-gray-600">We connect you with the nearest available provider</p>
-			</div>
-
-			<div class="hover-lift animation-delay-200 group relative text-center">
-				<div
-					class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-green-600 to-emerald-600 text-2xl font-bold text-white shadow-lg transition-transform group-hover:scale-110"
-				>
-					3
-				</div>
-				<h3 class="mb-2 text-xl font-bold text-gray-900">Get Help</h3>
-				<p class="text-gray-600">Track arrival and receive professional service</p>
-			</div>
-		</div>
-	</div>
-</section>
-
-<!-- Stats Section -->
-<section class="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 py-16">
-	<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-		<div class="grid grid-cols-2 gap-8 text-center text-white md:grid-cols-4">
-			<div class="stat-item">
-				<div class="counter mb-2 text-5xl font-bold">10,000+</div>
-				<div class="text-blue-100">Active Users</div>
-			</div>
-			<div class="stat-item animation-delay-100">
-				<div class="counter mb-2 text-5xl font-bold">500+</div>
-				<div class="text-purple-100">Service Providers</div>
-			</div>
-			<div class="stat-item animation-delay-200">
-				<div class="counter mb-2 text-5xl font-bold">50,000+</div>
-				<div class="text-pink-100">Jobs Completed</div>
-			</div>
-			<div class="stat-item animation-delay-300">
-				<div class="counter mb-2 text-5xl font-bold">4.9/5</div>
-				<div class="text-blue-100">Average Rating</div>
-			</div>
-		</div>
-	</div>
-</section>
-
-<!-- About Section -->
-<section id="about" class="bg-white py-20">
-	<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-		<div class="mx-auto max-w-3xl text-center">
-			<h2 class="mb-6 text-3xl font-bold text-gray-900 md:text-4xl">About VBAMS</h2>
-			<p class="mb-8 text-lg leading-relaxed text-gray-600">
-				Vehicle Breakdown Assistance Management System (VBAMS) is a professional platform connecting
-				drivers with verified service providers. We leverage technology to make roadside assistance
-				fast, reliable, and transparent.
-			</p>
-			<div class="mt-12 grid grid-cols-1 gap-6 md:grid-cols-3">
-				<div
-					class="hover-lift rounded-xl border-2 border-blue-200 p-6 transition-all hover:border-blue-600 hover:shadow-lg"
-				>
-					<i
-						class="fas fa-clock mb-3 bg-gradient-to-br from-blue-600 to-cyan-600 bg-clip-text text-4xl text-transparent"
-					></i>
-					<h4 class="mb-2 font-bold text-gray-900">24/7 Availability</h4>
-					<p class="text-sm text-gray-600">Always here when you need us</p>
-				</div>
-				<div
-					class="hover-lift animation-delay-100 rounded-xl border-2 border-purple-200 p-6 transition-all hover:border-purple-600 hover:shadow-lg"
-				>
-					<i
-						class="fas fa-dollar-sign mb-3 bg-gradient-to-br from-purple-600 to-pink-600 bg-clip-text text-4xl text-transparent"
-					></i>
-					<h4 class="mb-2 font-bold text-gray-900">Transparent Pricing</h4>
-					<p class="text-sm text-gray-600">No hidden fees or surprises</p>
-				</div>
-				<div
-					class="hover-lift animation-delay-200 rounded-xl border-2 border-green-200 p-6 transition-all hover:border-green-600 hover:shadow-lg"
-				>
-					<i
-						class="fas fa-headset mb-3 bg-gradient-to-br from-green-600 to-emerald-600 bg-clip-text text-4xl text-transparent"
-					></i>
-					<h4 class="mb-2 font-bold text-gray-900">Dedicated Support</h4>
-					<p class="text-sm text-gray-600">Professional customer service</p>
-				</div>
-			</div>
-		</div>
-	</div>
-</section>
-
-<!-- CTA Section -->
-<section class="bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 py-20">
-	<div class="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
-		<h2 class="mb-4 text-3xl font-bold text-gray-900 md:text-4xl">Ready to Get Started?</h2>
-		<p class="mb-8 text-lg text-gray-600">Choose your role and access the platform</p>
-		<div class="flex flex-col justify-center gap-4 sm:flex-row">
-			<a
-				href="/login/driver"
-				class="transform rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 px-8 py-4 font-semibold text-white transition-all hover:-translate-y-1 hover:shadow-2xl"
+				transition:slide={{ duration: 200 }}
+				class="border-b border-gray-100 bg-white shadow-xl md:hidden"
 			>
-				<i class="fas fa-car mr-2"></i>
-				Login as Driver
-			</a>
-			<a
-				href="/login/provider"
-				class="transform rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 px-8 py-4 font-semibold text-white transition-all hover:-translate-y-1 hover:shadow-2xl"
-			>
-				<i class="fas fa-tools mr-2"></i>
-				Login as Provider
-			</a>
-		</div>
-	</div>
-</section>
-
-<!-- Footer -->
-<footer class="bg-gray-900 py-12 text-white">
-	<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-		<div class="grid grid-cols-1 gap-8 md:grid-cols-4">
-			<!-- Brand -->
-			<div class="col-span-1 md:col-span-2">
-				<div class="mb-4 flex items-center">
-					<div
-						class="mr-3 flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-purple-600"
+				<div class="space-y-1 px-4 py-4 pb-6">
+					<a
+						href="#how-it-works"
+						onclick={closeMobileMenu}
+						class="block rounded-lg px-3 py-2 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-blue-600"
 					>
-						<i class="fas fa-car text-white"></i>
+						How it Works
+					</a>
+					<a
+						href="#features"
+						onclick={closeMobileMenu}
+						class="block rounded-lg px-3 py-2 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-blue-600"
+					>
+						Features
+					</a>
+					<a
+						href="#roles"
+						onclick={closeMobileMenu}
+						class="block rounded-lg px-3 py-2 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-blue-600"
+					>
+						For Providers
+					</a>
+					<div class="mt-4 grid grid-cols-2 gap-3 border-t border-gray-100 pt-4">
+						<a
+							href="/login"
+							onclick={closeMobileMenu}
+							class="flex items-center justify-center rounded-lg border border-gray-300 px-4 py-2.5 text-center font-semibold text-gray-700 hover:bg-gray-50"
+						>
+							Log in
+						</a>
+						<a
+							href="/register"
+							onclick={closeMobileMenu}
+							class="flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2.5 text-center font-semibold text-white hover:bg-blue-700"
+						>
+							Sign up
+						</a>
 					</div>
-					<span class="text-xl font-bold">VBAMS</span>
 				</div>
-				<p class="max-w-sm text-gray-400">
-					Professional roadside assistance platform connecting drivers with verified service
-					providers.
+			</div>
+		{/if}
+	</nav>
+
+	<!-- Hero Section -->
+	<header class="relative overflow-hidden pb-20 pt-32 lg:pb-32 lg:pt-48">
+		<!-- Background Elements -->
+		<div
+			class="absolute -right-24 -top-24 h-96 w-96 rounded-full bg-blue-200/50 blur-3xl filter"
+		></div>
+		<div
+			class="absolute -left-24 top-1/2 h-72 w-72 rounded-full bg-purple-200/50 blur-3xl filter"
+		></div>
+
+		<div class="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+			<div class="items-center lg:grid lg:grid-cols-12 lg:gap-16">
+				<!-- Text Content -->
+				<div class="mb-12 text-center lg:col-span-7 lg:mb-0 lg:text-left">
+					<div
+						class="mb-6 inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-blue-700"
+					>
+						<span class="h-2 w-2 animate-pulse rounded-full bg-blue-500"></span>
+						24/7 Assistance
+					</div>
+					<h1
+						class="mb-6 text-4xl font-extrabold leading-tight tracking-tight text-gray-900 sm:text-5xl md:text-6xl"
+					>
+						Roadside help when <br class="hidden lg:block" />
+						<span
+							class="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"
+						>
+							you need it most.
+						</span>
+					</h1>
+					<p class="mx-auto mb-8 max-w-2xl text-lg leading-relaxed text-gray-600 lg:mx-0">
+						Instant connection to verified mechanics and tow trucks. Track your help in real-time.
+						No membership fees, pay only when you use it.
+					</p>
+
+					<div class="flex flex-col items-center justify-center gap-4 sm:flex-row lg:justify-start">
+						<a
+							href="/login"
+							class="inline-flex w-full items-center justify-center rounded-full bg-blue-600 px-8 py-3.5 text-base font-semibold text-white shadow-lg shadow-blue-600/30 transition-all hover:-translate-y-0.5 hover:bg-blue-700 sm:w-auto"
+						>
+							Request Assistance
+							<i class="fas fa-arrow-right ml-2"></i>
+						</a>
+						<a
+							href="#how-it-works"
+							class="inline-flex w-full items-center justify-center rounded-full border border-gray-300 bg-white px-8 py-3.5 text-base font-semibold text-gray-700 transition-all hover:border-gray-400 hover:bg-gray-50 sm:w-auto"
+						>
+							How it works
+						</a>
+					</div>
+				</div>
+
+				<!-- Hero Visual -->
+				<div class="relative lg:col-span-5">
+					<div class="relative mx-auto w-full max-w-md lg:max-w-full">
+						<!-- Main Card -->
+						<div class="relative z-10 rounded-2xl bg-white p-6 shadow-2xl ring-1 ring-gray-900/5">
+							<div class="mb-6 flex items-center justify-between">
+								<div>
+									<h3 class="font-bold text-gray-900">Arriving Soon</h3>
+									<p class="text-sm text-gray-500">Tow Truck • 5 mins away</p>
+								</div>
+								<div
+									class="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 text-green-600"
+								>
+									<i class="fas fa-phone"></i>
+								</div>
+							</div>
+
+							<!-- Map Placeholder -->
+							<div
+								class="relative mb-4 flex h-48 w-full items-center justify-center overflow-hidden rounded-xl bg-gray-100"
+							>
+								<div
+									class="absolute inset-0 opacity-20"
+									style="background-image: radial-gradient(#cbd5e1 2px, transparent 2px); background-size: 20px 20px;"
+								></div>
+								<div class="relative z-10 animate-bounce">
+									<i class="fas fa-map-marker-alt text-4xl text-blue-600 drop-shadow-lg"></i>
+								</div>
+							</div>
+
+							<!-- Driver Info -->
+							<div class="flex items-center">
+								<div
+									class="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-gray-200 shadow-sm"
+								>
+									<img
+										src="https://ui-avatars.com/api/?name=John+D&background=random"
+										alt="Driver"
+									/>
+								</div>
+								<div class="ml-3">
+									<p class="text-sm font-semibold text-gray-900">John Best</p>
+									<div class="flex items-center text-xs text-yellow-500">
+										<i class="fas fa-star"></i>
+										<span class="ml-1 text-gray-600">4.9 (120+ jobs)</span>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<!-- Floating Badge 1 -->
+						<div
+							class="animate-float-slow absolute -right-6 -top-6 z-0 hidden rounded-xl bg-white p-3 shadow-xl ring-1 ring-gray-900/5 sm:block lg:-right-12"
+						>
+							<div class="flex items-center gap-3">
+								<div class="rounded-lg bg-green-100 p-2 text-green-600">
+									<i class="fas fa-check"></i>
+								</div>
+								<div>
+									<div class="text-xs text-gray-500">Assistance</div>
+									<div class="text-sm font-bold">Verified</div>
+								</div>
+							</div>
+						</div>
+
+						<!-- Floating Badge 2 -->
+						<div
+							class="animate-float-delayed absolute -bottom-6 -left-6 z-20 hidden rounded-xl bg-white p-3 shadow-xl ring-1 ring-gray-900/5 sm:block"
+						>
+							<div class="flex items-center gap-3">
+								<div class="rounded-lg bg-purple-100 p-2 text-purple-600">
+									<i class="fas fa-bolt"></i>
+								</div>
+								<div>
+									<div class="text-xs text-gray-500">Response Time</div>
+									<div class="text-sm font-bold">&lt; 15 mins</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</header>
+
+	<!-- How it works Section -->
+	<section id="how-it-works" class="bg-blue-50 py-20">
+		<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+			<div class="mb-16 text-center">
+				<h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">How VBAMS Works</h2>
+				<p class="mt-4 text-lg text-gray-600">Getting back on the road is as easy as 1-2-3.</p>
+			</div>
+
+			<div class="relative grid grid-cols-1 gap-8 md:grid-cols-3">
+				<!-- Step 1 -->
+				<div class="relative flex flex-col items-center text-center">
+					<div
+						class="mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-blue-600 text-2xl font-bold text-white shadow-lg shadow-blue-600/30"
+					>
+						1
+					</div>
+					<h3 class="mb-3 text-xl font-bold text-gray-900">Request Help</h3>
+					<p class="max-w-xs text-gray-600">
+						Tell us what happened and where you are using our simple app. No signup required to view
+						estimates.
+					</p>
+				</div>
+
+				<!-- Connector Line (Desktop) -->
+				<div
+					class="absolute left-1/3 top-8 hidden h-0.5 w-1/3 -translate-x-1/2 bg-gray-300 md:block"
+				></div>
+				<div
+					class="absolute right-1/3 top-8 hidden h-0.5 w-1/3 translate-x-1/2 bg-gray-300 md:block"
+				></div>
+
+				<!-- Step 2 -->
+				<div class="relative flex flex-col items-center text-center">
+					<div
+						class="mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-white text-2xl font-bold text-blue-600 shadow-lg ring-2 ring-blue-600"
+					>
+						2
+					</div>
+					<h3 class="mb-3 text-xl font-bold text-gray-900">Get Matched</h3>
+					<p class="max-w-xs text-gray-600">
+						We instantly notify nearby verified mechanics and tow trucks. Review their profile and
+						price.
+					</p>
+				</div>
+
+				<!-- Step 3 -->
+				<div class="relative flex flex-col items-center text-center">
+					<div
+						class="mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-blue-600 text-2xl font-bold text-white shadow-lg shadow-blue-600/30"
+					>
+						3
+					</div>
+					<h3 class="mb-3 text-xl font-bold text-gray-900">Help Arrives</h3>
+					<p class="max-w-xs text-gray-600">
+						Track your provider in real-time. Pay securely through the app only after the job is
+						done.
+					</p>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- Role Selection Section (Replaces the login shortcuts in a nicer way) -->
+	<section id="roles" class="bg-white py-20">
+		<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+			<div class="mb-16 text-center">
+				<h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+					Choose your path
+				</h2>
+				<p class="mt-4 text-lg text-gray-600">
+					Whether you need help or want to provide it, we have the tools for you.
 				</p>
 			</div>
 
-			<!-- Quick Links -->
-			<div>
-				<h3 class="mb-4 font-bold">Access Portal</h3>
-				<ul class="space-y-2">
-					<li>
-						<a href="/login/driver" class="text-gray-400 transition-colors hover:text-blue-400"
-							>Driver Login</a
+			<div class="mx-auto grid max-w-4xl grid-cols-1 gap-8 md:grid-cols-2">
+				<!-- Driver Card -->
+				<a
+					href="/login?role=driver"
+					class="group relative rounded-3xl border border-gray-200 bg-white p-8 shadow-sm transition-all hover:scale-[1.02] hover:border-blue-200 hover:shadow-xl"
+				>
+					<div
+						class="absolute right-0 top-0 p-6 opacity-10 transition-opacity group-hover:opacity-20"
+					>
+						<i class="fas fa-car text-8xl text-blue-600"></i>
+					</div>
+					<div class="relative z-10">
+						<div
+							class="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 text-blue-600"
 						>
-					</li>
-					<li>
-						<a href="/login/provider" class="text-gray-400 transition-colors hover:text-purple-400"
-							>Provider Login</a
+							<i class="fas fa-steering-wheel text-xl"></i>
+						</div>
+						<h3 class="mb-3 text-2xl font-bold text-gray-900">For Drivers</h3>
+						<p class="mb-6 text-gray-600">
+							Standard vehicle owners. Request assistance, track service providers, and manage your
+							vehicles.
+						</p>
+						<span
+							class="inline-flex items-center font-semibold text-blue-600 transition-transform group-hover:translate-x-1"
 						>
-					</li>
-					<li>
-						<a href="/login/admin" class="text-gray-400 transition-colors hover:text-red-400"
-							>Admin Login</a
+							Login as Driver <i class="fas fa-arrow-right ml-2 text-sm"></i>
+						</span>
+					</div>
+				</a>
+
+				<!-- Provider Card -->
+				<a
+					href="/login?role=provider"
+					class="group relative rounded-3xl border border-gray-200 bg-white p-8 shadow-sm transition-all hover:scale-[1.02] hover:border-purple-200 hover:shadow-xl"
+				>
+					<div
+						class="absolute right-0 top-0 p-6 opacity-10 transition-opacity group-hover:opacity-20"
+					>
+						<i class="fas fa-tools text-8xl text-purple-600"></i>
+					</div>
+					<div class="relative z-10">
+						<div
+							class="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-purple-100 text-purple-600"
 						>
-					</li>
-				</ul>
+							<i class="fas fa-wrench text-xl"></i>
+						</div>
+						<h3 class="mb-3 text-2xl font-bold text-gray-900">For Providers</h3>
+						<p class="mb-6 text-gray-600">
+							Mechanics, tow trucks, and technicians. Accept jobs, manage your schedule, and earn
+							money.
+						</p>
+						<span
+							class="inline-flex items-center font-semibold text-purple-600 transition-transform group-hover:translate-x-1"
+						>
+							Login as Provider <i class="fas fa-arrow-right ml-2 text-sm"></i>
+						</span>
+					</div>
+				</a>
 			</div>
 
-			<!-- Contact -->
-			<div>
-				<h3 class="mb-4 font-bold">Contact</h3>
-				<ul class="space-y-2 text-gray-400">
-					<li class="flex items-center transition-colors hover:text-white">
-						<i class="fas fa-envelope mr-2 text-sm"></i>
-						<span class="text-sm">support@vbams.com</span>
-					</li>
-					<li class="flex items-center transition-colors hover:text-white">
-						<i class="fas fa-phone mr-2 text-sm"></i>
-						<span class="text-sm">+1 (555) 123-4567</span>
-					</li>
-					<li class="flex items-center transition-colors hover:text-white">
-						<i class="fas fa-clock mr-2 text-sm"></i>
-						<span class="text-sm">24/7 Support</span>
-					</li>
-				</ul>
+			<div class="mt-8 text-center">
+				<a
+					href="/login/admin"
+					class="text-sm font-medium text-gray-500 transition-colors hover:text-gray-800"
+				>
+					<i class="fas fa-lock mr-1"></i> Admin Access
+				</a>
 			</div>
 		</div>
+	</section>
 
-		<div class="mt-12 border-t border-gray-800 pt-8 text-center text-sm text-gray-400">
-			&copy; {new Date().getFullYear()} VBAMS. All rights reserved.
+	<!-- Features Grid -->
+	<section id="features" class="bg-gray-50/50 py-20">
+		<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+			<div class="mb-16 text-center">
+				<h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+					Everything you need
+				</h2>
+			</div>
+
+			<div class="grid grid-cols-1 gap-8 md:grid-cols-3">
+				<div class="rounded-2xl border border-gray-100 bg-white p-8 shadow-sm">
+					<div
+						class="mb-6 flex h-12 w-12 items-center justify-center rounded-lg bg-red-100 text-red-600"
+					>
+						<i class="fas fa-map-marked-alt text-xl"></i>
+					</div>
+					<h3 class="mb-3 text-xl font-bold text-gray-900">Live Tracking</h3>
+					<p class="text-gray-600">
+						Watch your service provider approach on the map in real-time. No more guessing.
+					</p>
+				</div>
+				<div class="rounded-2xl border border-gray-100 bg-white p-8 shadow-sm">
+					<div
+						class="mb-6 flex h-12 w-12 items-center justify-center rounded-lg bg-green-100 text-green-600"
+					>
+						<i class="fas fa-shield-alt text-xl"></i>
+					</div>
+					<h3 class="mb-3 text-xl font-bold text-gray-900">Verified Pros</h3>
+					<p class="text-gray-600">
+						Every mechanic and driver is background checked and verified for your safety.
+					</p>
+				</div>
+				<div class="rounded-2xl border border-gray-100 bg-white p-8 shadow-sm">
+					<div
+						class="mb-6 flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100 text-blue-600"
+					>
+						<i class="fas fa-receipt text-xl"></i>
+					</div>
+					<h3 class="mb-3 text-xl font-bold text-gray-900">Transparent Cost</h3>
+					<p class="text-gray-600">
+						See the estimated cost before you confirm. Secure payment processing.
+					</p>
+				</div>
+			</div>
 		</div>
-	</div>
-</footer>
+	</section>
+
+	<!-- Footer -->
+	<footer class="bg-gray-900 py-12 text-white">
+		<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+			<div class="mb-8 grid grid-cols-1 gap-8 md:grid-cols-4">
+				<div class="col-span-1 md:col-span-2">
+					<span
+						class="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-2xl font-bold text-transparent"
+						>VBAMS</span
+					>
+					<p class="mt-4 max-w-xs text-gray-400">
+						Modernizing roadside assistance for everyone. Fast, safe, and reliable.
+					</p>
+				</div>
+				<div>
+					<h4 class="mb-4 font-bold">Platform</h4>
+					<ul class="space-y-2 text-sm text-gray-400">
+						<li><a href="/login" class="hover:text-white">Login</a></li>
+						<li><a href="/register" class="hover:text-white">Register</a></li>
+						<li><a href="/about" class="hover:text-white">About Us</a></li>
+					</ul>
+				</div>
+				<div>
+					<h4 class="mb-4 font-bold">Support</h4>
+					<ul class="space-y-2 text-sm text-gray-400">
+						<li><a href="/contact" class="hover:text-white">Contact Center</a></li>
+						<li><a href="/faq" class="hover:text-white">FAQ</a></li>
+						<li><a href="/privacy" class="hover:text-white">Privacy Policy</a></li>
+					</ul>
+				</div>
+			</div>
+			<div class="border-t border-gray-800 pt-8 text-center text-sm text-gray-500">
+				&copy; {new Date().getFullYear()} VBAMS. All rights reserved.
+			</div>
+		</div>
+	</footer>
+</div>
 
 <style>
-	/* Animated Background Blobs */
-	.blob {
-		position: absolute;
-		border-radius: 50%;
-		filter: blur(70px);
-		opacity: 0.5;
-		animation: blob 20s infinite;
-	}
-
-	.blob-1 {
-		width: 300px;
-		height: 300px;
-		background: linear-gradient(to right, #3b82f6, #8b5cf6);
-		top: -100px;
-		left: -100px;
-	}
-
-	.blob-2 {
-		width: 400px;
-		height: 400px;
-		background: linear-gradient(to right, #8b5cf6, #ec4899);
-		bottom: -150px;
-		right: -150px;
-		animation-delay: -10s;
-	}
-
-	.blob-3 {
-		width: 250px;
-		height: 250px;
-		background: linear-gradient(to right, #06b6d4, #3b82f6);
-		top: 50%;
-		left: 50%;
-		animation-delay: -5s;
-	}
-
-	@keyframes blob {
+	@keyframes float-slow {
 		0%,
 		100% {
-			transform: translate(0, 0) scale(1);
-		}
-		33% {
-			transform: translate(30px, -50px) scale(1.1);
-		}
-		66% {
-			transform: translate(-20px, 20px) scale(0.9);
-		}
-	}
-
-	/* Fade in up animation */
-	@keyframes fadeInUp {
-		from {
-			opacity: 0;
-			transform: translateY(30px);
-		}
-		to {
-			opacity: 1;
 			transform: translateY(0);
 		}
-	}
-
-	.animate-fadeInUp {
-		animation: fadeInUp 0.6s ease-out forwards;
-		opacity: 0;
-	}
-
-	.animation-delay-100 {
-		animation-delay: 0.1s;
-	}
-
-	.animation-delay-200 {
-		animation-delay: 0.2s;
-	}
-
-	.animation-delay-300 {
-		animation-delay: 0.3s;
-	}
-
-	/* Slide in animation */
-	@keyframes slideIn {
-		from {
-			opacity: 0;
-			transform: translateX(-20px);
-		}
-		to {
-			opacity: 1;
-			transform: translateX(0);
+		50% {
+			transform: translateY(-10px);
 		}
 	}
-
-	.animate-slideIn {
-		animation: slideIn 0.5s ease-out;
-	}
-
-	/* Hover lift effect */
-	.hover-lift {
-		transition:
-			transform 0.3s ease,
-			box-shadow 0.3s ease;
-	}
-
-	.hover-lift:hover {
-		transform: translateY(-8px);
-	}
-
-	/* Stats counter animation */
-	.stat-item {
-		animation: fadeInUp 0.8s ease-out forwards;
-		opacity: 0;
-	}
-
-	.counter {
-		display: inline-block;
-		animation: counterScale 0.6s ease-out 0.3s forwards;
-		transform: scale(0);
-	}
-
-	@keyframes counterScale {
-		0% {
-			transform: scale(0);
+	@keyframes float-delayed {
+		0%,
+		100% {
+			transform: translateY(0);
 		}
 		50% {
-			transform: scale(1.1);
+			transform: translateY(-8px);
 		}
-		100% {
-			transform: scale(1);
-		}
+	}
+	.animate-float-slow {
+		animation: float-slow 3s ease-in-out infinite;
+	}
+	.animate-float-delayed {
+		animation: float-delayed 4s ease-in-out infinite 1s;
 	}
 </style>

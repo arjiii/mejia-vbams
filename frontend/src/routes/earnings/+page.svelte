@@ -1,45 +1,57 @@
 <script lang="ts">
-	let earnings = $state({
-		today: 850,
-		thisWeek: 3250,
-		thisMonth: 12400,
-		total: 45600
+	import { onMount } from 'svelte';
+	import api from '$lib/utils/api';
+
+	import { providerStore } from '$lib/stores/dashboard';
+
+	let allJobs = $derived($providerStore.data?.allJobs || []);
+	let loading = $derived($providerStore.loading);
+	let today = new Date();
+
+	// Computed Earnings
+	let earnings = $derived.by(() => {
+		const jobs = allJobs.filter((j: any) => j.status === 'completed');
+
+		const isToday = (date: Date) => date.toDateString() === today.toDateString();
+		const isThisWeek = (date: Date) => {
+			const d = new Date(date);
+			const day = today.getDay();
+			const diff = today.getDate() - day + (day === 0 ? -6 : 1);
+			const monday = new Date(today.setDate(diff));
+			return d >= monday;
+		};
+		const isThisMonth = (date: Date) =>
+			date.getMonth() === today.getMonth() && date.getFullYear() === today.getFullYear();
+
+		return {
+			today: jobs
+				.filter((j) => isToday(new Date(j.created_at)))
+				.reduce((acc, j) => acc + (j.actual_cost || 0), 0),
+			thisWeek: jobs
+				.filter((j) => isThisWeek(new Date(j.created_at)))
+				.reduce((acc, j) => acc + (j.actual_cost || 0), 0),
+			thisMonth: jobs
+				.filter((j) => isThisMonth(new Date(j.created_at)))
+				.reduce((acc, j) => acc + (j.actual_cost || 0), 0),
+			total: jobs.reduce((acc, j) => acc + (j.actual_cost || 0), 0)
+		};
 	});
 
-	let transactions = $state([
-		{
-			id: 1,
-			job: 'Tire Replacement',
-			customer: 'John Doe',
-			amount: 500,
-			date: '2024-12-04',
-			status: 'paid'
-		},
-		{
-			id: 2,
-			job: 'Battery Service',
-			customer: 'Jane Smith',
-			amount: 400,
-			date: '2024-12-03',
-			status: 'paid'
-		},
-		{
-			id: 3,
-			job: 'Towing',
-			customer: 'Bob Wilson',
-			amount: 1200,
-			date: '2024-12-03',
-			status: 'pending'
-		},
-		{
-			id: 4,
-			job: 'Oil Change',
-			customer: 'Alice Brown',
-			amount: 300,
-			date: '2024-12-02',
-			status: 'paid'
-		}
-	]);
+	let transactions = $derived(
+		allJobs
+			.filter((j: any) => j.status === 'completed')
+			.map((j: any) => ({
+				job: j.service_type?.replace(/_/g, ' ').toUpperCase() || 'SERVICE',
+				customer: `Customer #${j.requester_id}`,
+				date: new Date(j.created_at).toLocaleDateString(),
+				amount: j.actual_cost || 0,
+				status: 'paid' // Assuming completed means paid for now
+			}))
+	);
+
+	onMount(() => {
+		providerStore.load();
+	});
 </script>
 
 <svelte:head>
@@ -49,7 +61,9 @@
 <div class="space-y-6">
 	<div>
 		<h1 class="text-3xl font-bold text-gray-900">My Earnings</h1>
-		<p class="mt-2 text-sm text-gray-600">Track your income and payment history</p>
+		<div class="flex items-center gap-4">
+			<p class="mt-2 text-sm text-gray-600">Track your income and payment history</p>
+		</div>
 	</div>
 
 	<!-- Earnings Cards -->

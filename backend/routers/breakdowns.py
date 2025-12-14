@@ -35,18 +35,34 @@ async def report_breakdown(
             detail="Vehicle not found or does not belong to you"
         )
     
-    # Create new breakdown report
-    db_breakdown = Breakdown(
-        vehicle_id=breakdown_data.vehicle_id,
-        driver_id=current_user.id,
-        **breakdown_data.dict()
-    )
-    
-    db.add(db_breakdown)
-    db.commit()
-    db.refresh(db_breakdown)
-    
-    return BreakdownResponse.from_orm(db_breakdown)
+    try:
+        # Create new breakdown report
+        # Convert Pydantic data to dict and handle Enums if necessary
+        data = breakdown_data.dict()
+        # Ensure Enums are stored as values (strings) to avoid type mismatch between schema/model Enums
+        if hasattr(data.get('category'), 'value'):
+            data['category'] = data['category'].value
+        if hasattr(data.get('severity'), 'value'):
+            data['severity'] = data['severity'].value
+            
+        db_breakdown = Breakdown(
+            vehicle_id=breakdown_data.vehicle_id,
+            driver_id=current_user.id,
+            **data
+        )
+        
+        db.add(db_breakdown)
+        db.commit()
+        db.refresh(db_breakdown)
+        
+        return BreakdownResponse.from_orm(db_breakdown)
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error creating breakdown: {str(e)}"
+        )
 
 @router.get("/", response_model=List[BreakdownResponse])
 async def get_user_breakdowns(

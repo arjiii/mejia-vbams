@@ -66,24 +66,7 @@ export async function login(email: string, password: string) {
 	}
 }
 
-// Development helper: bypass real authentication and set a mock user
-export function devLogin(overrides?: Partial<any>) {
-	const mockUser = Object.assign({
-		id: 1,
-		first_name: 'Dev',
-		last_name: 'User',
-		email: 'dev@example.com',
-		role: 'driver'
-	}, overrides || {});
 
-	if (browser) {
-		localStorage.setItem('token', 'dev-token');
-	}
-	token.set('dev-token');
-	user.set(mockUser);
-	isAuthenticated.set(true);
-	return { success: true };
-}
 
 // Register function
 export async function register(userData: any) {

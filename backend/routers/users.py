@@ -15,7 +15,7 @@ async def get_all_users(
     db: Session = Depends(get_db)
 ):
     """Get all users (admin only)."""
-    users = db.query(User).filter(User.is_active == True).all()
+    users = db.query(User).all()
     return [UserResponse.from_orm(user) for user in users]
 
 @router.get("/{user_id}", response_model=UserResponse)

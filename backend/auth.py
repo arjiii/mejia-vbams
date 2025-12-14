@@ -101,7 +101,23 @@ def require_role(required_roles: list):
     return role_checker
 
 # Role-based dependencies
+# Role-based dependencies
 require_driver = require_role(["driver"])
-require_service_provider = require_role(["service_provider"])
+
+def require_verified_service_provider_dep(current_user: User = Depends(get_current_active_user)) -> User:
+    if current_user.role != "service_provider":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not enough permissions"
+        )
+    if not current_user.is_verified:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Account pending verification. Please wait for admin approval."
+        )
+    return current_user
+
+require_service_provider = require_verified_service_provider_dep
+require_service_provider_any_status = require_role(["service_provider"])
 require_admin = require_role(["admin"])
 require_any_role = require_role(["driver", "service_provider", "admin"])

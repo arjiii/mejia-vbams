@@ -18,7 +18,7 @@ from dotenv import load_dotenv
 
 from database import engine, SessionLocal
 from models import Base
-from routers import auth, users, vehicles, breakdowns, service_providers, assistance
+from routers import auth, users, vehicles, breakdowns, service_providers, assistance, upload
 # removed unused import: middleware.auth.get_current_user (module not present in repo)
 from websocket_manager import websocket_manager
 
@@ -65,7 +65,13 @@ app.include_router(users.router, prefix="/api/users", tags=["Users"])
 app.include_router(vehicles.router, prefix="/api/vehicles", tags=["Vehicles"])
 app.include_router(breakdowns.router, prefix="/api/breakdowns", tags=["Breakdowns"])
 app.include_router(service_providers.router, prefix="/api/service-providers", tags=["Service Providers"])
+app.include_router(upload.router, prefix="/api/upload", tags=["Upload"])
 app.include_router(assistance.router, prefix="/api/assistance", tags=["Assistance"])
+
+# Mount static files
+from fastapi.staticfiles import StaticFiles
+os.makedirs("uploads", exist_ok=True)
+app.mount("/static/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 # WebSocket endpoint
 @app.websocket("/ws/{client_id}")

@@ -9,35 +9,28 @@
 		payment: number;
 	}
 
-	let jobs: Job[] = $state([
-		{
-			id: 1,
-			customer: 'John Doe',
-			type: 'Tire Replacement',
-			status: 'in_progress',
-			location: 'Makati City',
-			scheduledAt: '2024-12-04 14:30',
-			payment: 500
-		},
-		{
-			id: 2,
-			customer: 'Jane Smith',
-			type: 'Battery Service',
-			status: 'scheduled',
-			location: 'Quezon City',
-			scheduledAt: '2024-12-04 16:00',
-			payment: 400
-		},
-		{
-			id: 3,
-			customer: 'Bob Wilson',
-			type: 'Towing',
-			status: 'completed',
-			location: 'Manila',
-			scheduledAt: '2024-12-03 10:00',
-			payment: 1200
-		}
-	]);
+	import { onMount } from 'svelte';
+	import { providerStore } from '$lib/stores/dashboard';
+
+	let jobs = $derived(
+		($providerStore.data?.allJobs || []).map((j: any) => ({
+			id: j.id,
+			customer: `Customer #${j.requester_id}`,
+			type: j.service_type?.replace(/_/g, ' ').toUpperCase(),
+			status: j.status,
+			location: j.address || 'Unknown Location',
+			scheduledAt: new Date(j.created_at).toLocaleString(),
+			payment: j.actual_cost || j.estimated_cost || 0
+		}))
+	);
+
+	onMount(() => {
+		providerStore.load();
+	});
+
+	function refreshData() {
+		providerStore.load(true);
+	}
 
 	function getStatusColor(status: string) {
 		const colors: Record<string, string> = {
@@ -60,6 +53,12 @@
 			<h1 class="text-3xl font-bold text-gray-900">My Jobs</h1>
 			<p class="mt-2 text-sm text-gray-600">Manage your assigned and completed jobs</p>
 		</div>
+		<button
+			onclick={refreshData}
+			class="rounded-lg bg-gray-100 px-3 py-2 text-xs font-bold text-gray-600 hover:bg-gray-200"
+		>
+			<i class="fas fa-sync-alt mr-2"></i>Refresh
+		</button>
 	</div>
 
 	<!-- Jobs List -->

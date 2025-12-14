@@ -30,7 +30,7 @@ class User(Base):
 
     # Relationships
     vehicles = relationship("Vehicle", back_populates="owner")
-    breakdowns = relationship("Breakdown", back_populates="driver")
+    breakdowns = relationship("Breakdown", back_populates="driver", foreign_keys="Breakdown.driver_id")
     service_provider_profile = relationship("ServiceProvider", back_populates="user", uselist=False)
 
 class VehicleType(str, enum.Enum):
@@ -148,6 +148,7 @@ class ServiceProvider(Base):
     business_name = Column(String(100), nullable=False)
     business_license = Column(String(50), unique=True, nullable=False)
     services = Column(Text)  # JSON string of service types
+    documents = Column(Text) # JSON string of uploaded documents
     service_radius = Column(Integer, default=50)  # kilometers
     latitude = Column(Float, nullable=False)
     longitude = Column(Float, nullable=False)

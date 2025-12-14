@@ -37,9 +37,19 @@
 	}
 
 	function viewVehicle(v: any) {
-		// Navigate to details
-		// goto(`/app/vehicles/${v.id}`);
-		alert(`Vehicle ID: ${v.id}`);
+		goto(`/vehicles/${v.id}`);
+	}
+
+	async function deleteVehicle(v: any) {
+		if (!confirm(`Delete ${v.year} ${v.make} ${v.model}?\n\nThis cannot be undone!`)) return;
+
+		try {
+			await api.delete(`/vehicles/${v.id}`);
+			alert('Vehicle deleted successfully!');
+			driverStore.load(true);
+		} catch (e: any) {
+			alert(e.response?.data?.detail || 'Failed to delete vehicle');
+		}
 	}
 
 	function statusClass(isActive: boolean) {
@@ -146,6 +156,19 @@
 								>
 									<i class="fas fa-eye mr-1"></i>
 									View
+								</button>
+								<button
+									onclick={() => goto(`/vehicles/${v.id}`)}
+									class="flex-1 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-blue-700"
+								>
+									<i class="fas fa-edit mr-1"></i>
+									Edit
+								</button>
+								<button
+									onclick={() => deleteVehicle(v)}
+									class="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-red-700"
+								>
+									<i class="fas fa-trash"></i>
 								</button>
 							</div>
 						</div>

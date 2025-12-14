@@ -34,9 +34,20 @@ async def create_assistance_request(
         )
     
     # Create assistance request
+    request_dict = request_data.dict()
+    
+    # If user selected a specific provider, assign directly
+    if request_dict.get('service_provider_id'):
+        request_dict['assigned_provider_id'] = request_dict.pop('service_provider_id')
+        request_dict['status'] = 'assigned'  # Mark as assigned immediately
+        
+        # Update breakdown with selected provider
+        breakdown.service_provider_id = request_dict['assigned_provider_id']
+        breakdown.status = 'assigned'
+    
     db_request = AssistanceRequest(
         requester_id=current_user.id,
-        **request_data.dict()
+        **request_dict
     )
     
     db.add(db_request)

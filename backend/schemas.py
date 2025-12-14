@@ -280,7 +280,7 @@ class AssistanceRequestBase(BaseModel):
     emergency_contact_relationship: Optional[str] = None
 
 class AssistanceRequestCreate(AssistanceRequestBase):
-    pass
+    service_provider_id: Optional[int] = None  # Allow user to select a specific provider
 
 class AssistanceRequestUpdate(BaseModel):
     status: Optional[str] = None
